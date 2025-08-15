@@ -1,4 +1,4 @@
-package dilithium3aes
+package dilithium3AES
 
 import (
 	"crypto"
@@ -30,7 +30,7 @@ type PrivateKey struct {
 func GenerateKey() (*PrivateKey, error) {
 	// fmt.Println("----PQC秘钥对生成开始: ", sigName)
 
-	defer signer.Clean() // clean up even in case of panic
+	//defer signer.Clean() // clean up even in case of panic
 
 	if err := signer.Init(sigName, nil); err != nil {
 		log.Fatal(err)
@@ -87,7 +87,7 @@ func (pub *PublicKey) Equal(x crypto.PublicKey) bool {
 func Verify(pubkey *PublicKey, msg, signature []byte) bool {
 	// fmt.Println("----PQC验签开始: ", sigName)
 
-	defer verifier.Clean()
+	//defer verifier.Clean()
 
 	if err := verifier.Init(sigName, nil); err != nil {
 		log.Fatal(err)
@@ -103,4 +103,18 @@ func Verify(pubkey *PublicKey, msg, signature []byte) bool {
 	// fmt.Println("----PQC验签结束: ", sigName)
 
 	return isValid
+}
+
+// cleanup functions
+func Cleanup() {
+	signer.Clean()
+	verifier.Clean()
+}
+
+func CleanupSigner() {
+	signer.Clean()
+}
+
+func CleanupVerifier() {
+	verifier.Clean()
 }

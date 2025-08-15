@@ -1,4 +1,4 @@
-package dilithium5aes
+package dilithium5AES
 
 import (
 	"crypto"
@@ -103,4 +103,18 @@ func Verify(pubkey *PublicKey, msg, signature []byte) bool {
 	// fmt.Println("----PQC验签结束: ", sigName)
 
 	return isValid
+}
+
+// cleanup functions
+func Cleanup() {
+	signer.Clean()
+	verifier.Clean()
+}
+
+func CleanupSigner() {
+	signer.Clean()
+}
+
+func CleanupVerifier() {
+	verifier.Clean()
 }
