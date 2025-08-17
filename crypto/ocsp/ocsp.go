@@ -12,19 +12,10 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/pqc/dilithium/dilithium2"
-	dilithium2AES "crypto/pqc/dilithium/dilithium2AES"
 	dilithium3 "crypto/pqc/dilithium/dilithium3"
-	dilithium3AES "crypto/pqc/dilithium/dilithium3AES"
 	dilithium5 "crypto/pqc/dilithium/dilithium5"
-	dilithium5AES "crypto/pqc/dilithium/dilithium5AES"
 	falcon1024 "crypto/pqc/falcon/falcon1024"
 	"crypto/pqc/falcon/falcon512"
-	rainbowIIICircumzenithal "crypto/pqc/rainbow/rainbowIIICircumzenithal"
-	rainbowIIIClassic "crypto/pqc/rainbow/rainbowIIIClassic"
-	rainbowIIICompressed "crypto/pqc/rainbow/rainbowIIICompressed"
-	rainbowVCircumzenithal "crypto/pqc/rainbow/rainbowVCircumzenithal"
-	rainbowVClassic "crypto/pqc/rainbow/rainbowVClassic"
-	rainbowVCompressed "crypto/pqc/rainbow/rainbowVCompressed"
 	"crypto/rand"
 	"crypto/rsa"
 	_ "crypto/sha1"
@@ -217,16 +208,6 @@ var signatureAlgorithmDetails = []struct {
 	{x509.PureDilithium2, oidSignatureDilithium2, x509.Dilithium2, crypto.Hash(0)},
 	{x509.PureDilithium3, oidSignatureDilithium3, x509.Dilithium3, crypto.Hash(0)},
 	{x509.PureDilithium5, oidSignatureDilithium5, x509.Dilithium5, crypto.Hash(0)},
-	{x509.PureDilithium2AES, oidSignatureDilithium2AES, x509.Dilithium2AES, crypto.Hash(0)},
-	{x509.PureDilithium3AES, oidSignatureDilithium3AES, x509.Dilithium3AES, crypto.Hash(0)},
-	{x509.PureDilithium5AES, oidSignatureDilithium5AES, x509.Dilithium5AES, crypto.Hash(0)},
-
-	{x509.PureRainbowIIIClassic, oidSignatureRainbowIIIClassic, x509.RainbowIIIClassic, crypto.Hash(0)},
-	{x509.PureRainbowIIICircumzenithal, oidSignatureRainbowIIICircumzenithal, x509.RainbowIIICircumzenithal, crypto.Hash(0)},
-	{x509.PureRainbowIIICompressed, oidSignatureRainbowIIICompressed, x509.RainbowIIICompressed, crypto.Hash(0)},
-	{x509.PureRainbowVClassic, oidSignatureRainbowVClassic, x509.RainbowVClassic, crypto.Hash(0)},
-	{x509.PureRainbowVCircumzenithal, oidSignatureRainbowVCircumzenithal, x509.RainbowVCircumzenithal, crypto.Hash(0)},
-	{x509.PureRainbowVCompressed, oidSignatureRainbowVCompressed, x509.RainbowVCompressed, crypto.Hash(0)},
 }
 
 // TODO(rlb): This is also from crypto/x509, so same comment as AGL's below
@@ -275,34 +256,6 @@ func signingParamsForPublicKey(pub interface{}, requestedSigAlgo x509.SignatureA
 	case *dilithium5.PublicKey:
 		pubType = x509.Dilithium5
 		sigAlgo.Algorithm = oidSignatureDilithium5
-	case *dilithium2AES.PublicKey:
-		pubType = x509.Dilithium2AES
-		sigAlgo.Algorithm = oidSignatureDilithium2AES
-	case *dilithium3AES.PublicKey:
-		pubType = x509.Dilithium3AES
-		sigAlgo.Algorithm = oidSignatureDilithium3AES
-	case *dilithium5AES.PublicKey:
-		pubType = x509.Dilithium5AES
-		sigAlgo.Algorithm = oidSignatureDilithium5AES
-
-	case *rainbowIIIClassic.PublicKey:
-		pubType = x509.RainbowIIIClassic
-		sigAlgo.Algorithm = oidSignatureRainbowIIIClassic
-	case *rainbowIIICircumzenithal.PublicKey:
-		pubType = x509.RainbowIIICircumzenithal
-		sigAlgo.Algorithm = oidSignatureRainbowIIICircumzenithal
-	case *rainbowIIICompressed.PublicKey:
-		pubType = x509.RainbowIIICompressed
-		sigAlgo.Algorithm = oidSignatureRainbowIIICompressed
-	case *rainbowVClassic.PublicKey:
-		pubType = x509.RainbowVClassic
-		sigAlgo.Algorithm = oidSignatureRainbowVClassic
-	case *rainbowVCircumzenithal.PublicKey:
-		pubType = x509.RainbowVCircumzenithal
-		sigAlgo.Algorithm = oidSignatureRainbowVCircumzenithal
-	case *rainbowVCompressed.PublicKey:
-		pubType = x509.RainbowVCompressed
-		sigAlgo.Algorithm = oidSignatureRainbowVCompressed
 
 	default:
 		err = errors.New("x509: only RSA, ECDSA and pqc keys supported")
@@ -324,7 +277,7 @@ func signingParamsForPublicKey(pub interface{}, requestedSigAlgo x509.SignatureA
 				return
 			}
 			sigAlgo.Algorithm, hashFunc = details.oid, details.hash
-			if hashFunc == 0 && pubType != x509.Falcon512 && pubType != x509.Falcon1024 && pubType != x509.Dilithium2 && pubType != x509.Dilithium3 && pubType != x509.Dilithium5 && pubType != x509.Dilithium2AES && pubType != x509.Dilithium3AES && pubType != x509.Dilithium5AES && pubType != x509.RainbowIIIClassic && pubType != x509.RainbowIIICircumzenithal && pubType != x509.RainbowIIICompressed && pubType != x509.RainbowVClassic && pubType != x509.RainbowVCircumzenithal && pubType != x509.RainbowVCompressed {
+			if hashFunc == 0 && pubType != x509.Falcon512 && pubType != x509.Falcon1024 && pubType != x509.Dilithium2 && pubType != x509.Dilithium3 && pubType != x509.Dilithium5 {
 				err = errors.New("x509: cannot sign with hash function requested")
 				return
 			}

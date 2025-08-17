@@ -25,17 +25,6 @@ func _() {
 	_ = x[Dilithium2-2058]
 	_ = x[Dilithium3-2059]
 	_ = x[Dilithium5-2060]
-	_ = x[Dilithium2AES-2061]
-	_ = x[Dilithium3AES-2062]
-	_ = x[Dilithium5AES-2063]
-
-	_ = x[RainbowIIIClassic-2064]
-	_ = x[RainbowIIICircumzenithal-2065]
-	_ = x[RainbowIIICompressed - 2066]
-	_ = x[RainbowVClassic-2067]
-	_ = x[RainbowVCircumzenithal-2068]
-	_ = x[RainbowVCompressed - 2069]
-
 
 	_ = x[PKCS1WithSHA1-513]
 	_ = x[ECDSAWithSHA1-515]

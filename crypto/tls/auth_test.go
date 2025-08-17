@@ -170,7 +170,7 @@ func TestLegacyTypeAndHash(t *testing.T) {
 // TestSupportedSignatureAlgorithms checks that all supportedSignatureAlgorithms
 // have valid type and hash information.
 func TestSupportedSignatureAlgorithms(t *testing.T) {
-	for _, sigAlg := range supportedSignatureAlgorithms {
+	for _, sigAlg := range defaultSupportedSignatureAlgorithms {
 		if sigAlg == Falcon512 {
 			sigType, hash, err := typeAndHashFromSignatureScheme(sigAlg)
 			if err != nil {

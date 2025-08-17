@@ -8,7 +8,9 @@ import (
 	"bytes"
 	"context"
 	"crypto"
+	"crypto/ecdh"
 	"crypto/elliptic"
+	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
@@ -22,12 +24,17 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"golang.org/x/crypto/curve25519"
 )
 
 func testClientHello(t *testing.T, serverConfig *Config, m handshakeMessage) {
 	testClientHelloFailure(t, serverConfig, m, "")
+}
+
+// testFatal is a hack to prevent the compiler from complaining that there is a
+// call to t.Fatal from a non-test goroutine
+func testFatal(t *testing.T, err error) {
+	t.Helper()
+	t.Fatal(err)
 }
 
 func testClientHelloFailure(t *testing.T, serverConfig *Config, m handshakeMessage, expectedSubStr string) {
@@ -37,7 +44,9 @@ func testClientHelloFailure(t *testing.T, serverConfig *Config, m handshakeMessa
 		if ch, ok := m.(*clientHelloMsg); ok {
 			cli.vers = ch.vers
 		}
-		cli.writeRecord(recordTypeHandshake, m.marshal())
+		if _, err := cli.writeHandshakeRecord(m, nil); err != nil {
+			testFatal(t, err)
+		}
 		c.Close()
 	}()
 	ctx := context.Background()
@@ -194,7 +203,9 @@ func TestRenegotiationExtension(t *testing.T) {
 	go func() {
 		cli := Client(c, testConfig)
 		cli.vers = clientHello.vers
-		cli.writeRecord(recordTypeHandshake, clientHello.marshal())
+		if _, err := cli.writeHandshakeRecord(clientHello, nil); err != nil {
+			testFatal(t, err)
+		}
 
 		buf := make([]byte, 1024)
 		n, err := c.Read(buf)
@@ -249,12 +260,14 @@ func TestTLS12OnlyCipherSuites(t *testing.T) {
 	}
 
 	c, s := localPipe(t)
-	replyChan := make(chan interface{})
+	replyChan := make(chan any)
 	go func() {
 		cli := Client(c, testConfig)
 		cli.vers = clientHello.vers
-		cli.writeRecord(recordTypeHandshake, clientHello.marshal())
-		reply, err := cli.readHandshake()
+		if _, err := cli.writeHandshakeRecord(clientHello, nil); err != nil {
+			testFatal(t, err)
+		}
+		reply, err := cli.readHandshake(nil)
 		c.Close()
 		if err != nil {
 			replyChan <- err
@@ -281,7 +294,7 @@ func TestTLS12OnlyCipherSuites(t *testing.T) {
 
 func TestTLSPointFormats(t *testing.T) {
 	// Test that a Server returns the ec_point_format extension when ECC is
-	// negotiated, and not returned on RSA handshake.
+	// negotiated, and not on a RSA handshake or if ec_point_format is missing.
 	tests := []struct {
 		name                string
 		cipherSuites        []uint16
@@ -289,8 +302,11 @@ func TestTLSPointFormats(t *testing.T) {
 		supportedPoints     []uint8
 		wantSupportedPoints bool
 	}{
-		{"ECC", []uint16{TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA}, []CurveID{CurveP256}, []uint8{compressionNone}, true},
+		{"ECC", []uint16{TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA}, []CurveID{CurveP256}, []uint8{pointFormatUncompressed}, true},
+		{"ECC without ec_point_format", []uint16{TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA}, []CurveID{CurveP256}, nil, false},
+		{"ECC with extra values", []uint16{TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA}, []CurveID{CurveP256}, []uint8{13, 37, pointFormatUncompressed, 42}, true},
 		{"RSA", []uint16{TLS_RSA_WITH_AES_256_GCM_SHA384}, nil, nil, false},
+		{"RSA with ec_point_format", []uint16{TLS_RSA_WITH_AES_256_GCM_SHA384}, nil, []uint8{pointFormatUncompressed}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -304,12 +320,14 @@ func TestTLSPointFormats(t *testing.T) {
 			}
 
 			c, s := localPipe(t)
-			replyChan := make(chan interface{})
+			replyChan := make(chan any)
 			go func() {
 				cli := Client(c, testConfig)
 				cli.vers = clientHello.vers
-				cli.writeRecord(recordTypeHandshake, clientHello.marshal())
-				reply, err := cli.readHandshake()
+				if _, err := cli.writeHandshakeRecord(clientHello, nil); err != nil {
+					testFatal(t, err)
+				}
+				reply, err := cli.readHandshake(nil)
 				c.Close()
 				if err != nil {
 					replyChan <- err
@@ -330,22 +348,12 @@ func TestTLSPointFormats(t *testing.T) {
 				t.Fatalf("didn't get ServerHello message in reply. Got %v\n", reply)
 			}
 			if tt.wantSupportedPoints {
-				if len(serverHello.supportedPoints) < 1 {
-					t.Fatal("missing ec_point_format extension from server")
-				}
-				found := false
-				for _, p := range serverHello.supportedPoints {
-					if p == pointFormatUncompressed {
-						found = true
-						break
-					}
-				}
-				if !found {
-					t.Fatal("missing uncompressed format in ec_point_format extension from server")
+				if !bytes.Equal(serverHello.supportedPoints, []uint8{pointFormatUncompressed}) {
+					t.Fatal("incorrect ec_point_format extension from server")
 				}
 			} else {
 				if len(serverHello.supportedPoints) != 0 {
-					t.Fatalf("unexcpected ec_point_format extension from server: %v", serverHello.supportedPoints)
+					t.Fatalf("unexpected ec_point_format extension from server: %v", serverHello.supportedPoints)
 				}
 			}
 		})
@@ -385,13 +393,20 @@ func TestVersion(t *testing.T) {
 	}
 	clientConfig := &Config{
 		InsecureSkipVerify: true,
+		MinVersion:         VersionTLS10,
 	}
 	state, _, err := testHandshake(t, clientConfig, serverConfig)
 	if err != nil {
 		t.Fatalf("handshake failed: %s", err)
 	}
 	if state.Version != VersionTLS11 {
-		t.Fatalf("Incorrect version %x, should be %x", state.Version, VersionTLS11)
+		t.Fatalf("incorrect version %x, should be %x", state.Version, VersionTLS11)
+	}
+
+	clientConfig.MinVersion = 0
+	_, _, err = testHandshake(t, clientConfig, serverConfig)
+	if err == nil {
+		t.Fatalf("expected failure to connect with TLS 1.0/1.1")
 	}
 }
 
@@ -472,6 +487,7 @@ func testCrossVersionResume(t *testing.T, version uint16) {
 		InsecureSkipVerify: true,
 		ClientSessionCache: NewLRUClientSessionCache(1),
 		ServerName:         "servername",
+		MinVersion:         VersionTLS10,
 	}
 
 	// Establish a session at TLS 1.1.
@@ -582,7 +598,7 @@ func (test *serverTest) connFromCommand() (conn *recordingConn, child *exec.Cmd,
 		return nil, nil, err
 	}
 
-	connChan := make(chan interface{}, 1)
+	connChan := make(chan any, 1)
 	go func() {
 		tcpConn, err := l.Accept()
 		if err != nil {
@@ -1227,22 +1243,6 @@ func TestHandshakeServerEd25519(t *testing.T) {
 	runServerTestTLS13(t, test)
 }
 
-func TestHandshakeServerFalcon512(t *testing.T) {
-	config := testConfig.Clone()
-	config.Certificates = make([]Certificate, 1)
-	config.Certificates[0].Certificate = [][]byte{testFalcon512Certificate}
-	config.Certificates[0].PrivateKey = &testFalcon512PrivateKey
-	config.BuildNameToCertificate()
-
-	test := &serverTest{
-		name:    "Falcon512",
-		command: []string{"openssl", "s_client", "-no_ticket", "-cipher", "ECDHE-ECDSA-CHACHA20-POLY1305", "-ciphersuites", "TLS_CHACHA20_POLY1305_SHA256"},
-		config:  config,
-	}
-	runServerTestTLS12(t, test)
-	runServerTestTLS13(t, test)
-}
-
 func benchmarkHandshakeServer(b *testing.B, version uint16, cipherSuite uint16, curve CurveID, cert []byte, key crypto.PrivateKey) {
 	config := testConfig.Clone()
 	config.CipherSuites = []uint16{cipherSuite}
@@ -1352,10 +1352,7 @@ func BenchmarkHandshakeServer(b *testing.B) {
 }
 
 func TestClientAuth(t *testing.T) {
-	var certPath, keyPath string
-	var ecdsaCertPath, ecdsaKeyPath string
-	var ed25519CertPath, ed25519KeyPath string
-	var falcon512CertPath, falcon512KeyPath string
+	var certPath, keyPath, ecdsaCertPath, ecdsaKeyPath, ed25519CertPath, ed25519KeyPath string
 
 	if *update {
 		certPath = tempFile(clientCertificatePEM)
@@ -1370,11 +1367,6 @@ func TestClientAuth(t *testing.T) {
 		defer os.Remove(ed25519CertPath)
 		ed25519KeyPath = tempFile(clientEd25519KeyPEM)
 		defer os.Remove(ed25519KeyPath)
-
-		falcon512CertPath = tempFile(clientFalcon512CertificatePEM)
-		defer os.Remove(falcon512CertPath)
-		falcon512KeyPath = tempFile(clientFalcon512KeyPEM)
-		defer os.Remove(falcon512KeyPath)
 	} else {
 		t.Parallel()
 	}
@@ -1421,16 +1413,6 @@ func TestClientAuth(t *testing.T) {
 	runServerTestTLS13(t, test)
 
 	test = &serverTest{
-		name: "ClientAuthRequestedAndFalcon512Given",
-		command: []string{"openssl", "s_client", "-no_ticket", "-cipher", "AES128-SHA", "-ciphersuites", "TLS_AES_128_GCM_SHA256",
-			"-cert", falcon512CertPath, "-key", falcon512KeyPath},
-		config:            config,
-		expectedPeerCerts: []string{clientFalcon512CertificatePEM},
-	}
-	runServerTestTLS12(t, test)
-	runServerTestTLS13(t, test)
-
-	test = &serverTest{
 		name: "ClientAuthRequestedAndPKCS1v15Given",
 		command: []string{"openssl", "s_client", "-no_ticket", "-cipher", "AES128-SHA",
 			"-cert", certPath, "-key", keyPath, "-client_sigalgs", "rsa_pkcs1_sha256"},
@@ -1459,7 +1441,9 @@ func TestSNIGivenOnFailure(t *testing.T) {
 	go func() {
 		cli := Client(c, testConfig)
 		cli.vers = clientHello.vers
-		cli.writeRecord(recordTypeHandshake, clientHello.marshal())
+		if _, err := cli.writeHandshakeRecord(clientHello, nil); err != nil {
+			testFatal(t, err)
+		}
 		c.Close()
 	}()
 	conn := Server(s, serverConfig)
@@ -1935,6 +1919,7 @@ func TestAESCipherReorderingTLS13(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			hasAESGCMHardwareSupport = tc.serverHasAESGCM
+			pk, _ := ecdh.X25519().GenerateKey(rand.Reader)
 			hs := &serverHandshakeStateTLS13{
 				c: &Conn{
 					config: &Config{},
@@ -1944,7 +1929,7 @@ func TestAESCipherReorderingTLS13(t *testing.T) {
 					cipherSuites:       tc.clientCiphers,
 					supportedVersions:  []uint16{VersionTLS13},
 					compressionMethods: []uint8{compressionNone},
-					keyShares:          []keyShare{{group: X25519, data: curve25519.Basepoint}},
+					keyShares:          []keyShare{{group: X25519, data: pk.PublicKey().Bytes()}},
 				},
 			}
 
@@ -1960,7 +1945,7 @@ func TestAESCipherReorderingTLS13(t *testing.T) {
 	}
 }
 
-// TestServerHandshakeContextCancellation tests that cancelling
+// TestServerHandshakeContextCancellation tests that canceling
 // the context given to the server side conn.HandshakeContext
 // interrupts the in-progress handshake.
 func TestServerHandshakeContextCancellation(t *testing.T) {

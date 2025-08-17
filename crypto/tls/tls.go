@@ -344,135 +344,52 @@ func X509KeyPair(certPEMBlock, keyPEMBlock []byte) (Certificate, error) {
 			return fail(errors.New("tls: private key does not match public key"))
 		}
 
-	case *falcon512.PublicKey:
+	case falcon512.PublicKey:
 		priv, ok := cert.PrivateKey.(*falcon512.PrivateKey)
 		if !ok {
 			return fail(errors.New("tls: private key type does not match public key type, falcon512"))
 		}
 
-		if !bytes.Equal(priv.Public().(*falcon512.PublicKey).Pk, pub.Pk) {
+		if !bytes.Equal(priv.Public().(falcon512.PublicKey), pub) {
 			return fail(errors.New("tls: private key does not match public key, falcon512"))
 		}
-	case *falcon1024.PublicKey:
+	case falcon1024.PublicKey:
 		priv, ok := cert.PrivateKey.(*falcon1024.PrivateKey)
 		if !ok {
 			return fail(errors.New("tls: private key type does not match public key type, falcon1024"))
 		}
 
-		if !bytes.Equal(priv.Public().(*falcon1024.PublicKey).Pk, pub.Pk) {
+		if !bytes.Equal(priv.Public().(falcon1024.PublicKey), pub) {
 			return fail(errors.New("tls: private key does not match public key, falcon1024"))
 		}
 
-	case *dilithium2.PublicKey:
+	case dilithium2.PublicKey:
 		priv, ok := cert.PrivateKey.(*dilithium2.PrivateKey)
 		if !ok {
 			return fail(errors.New("tls: private key type does not match public key type, dilithium2"))
 		}
 
-		if !bytes.Equal(priv.Public().(*dilithium2.PublicKey).Pk, pub.Pk) {
+		if !bytes.Equal(priv.Public().(dilithium2.PublicKey), pub) {
 			return fail(errors.New("tls: private key does not match public key, dilithium2"))
 		}
-	case *dilithium3.PublicKey:
+	case dilithium3.PublicKey:
 		priv, ok := cert.PrivateKey.(*dilithium3.PrivateKey)
 		if !ok {
 			return fail(errors.New("tls: private key type does not match public key type, dilithium3"))
 		}
 
-		if !bytes.Equal(priv.Public().(*dilithium3.PublicKey).Pk, pub.Pk) {
+		if !bytes.Equal(priv.Public().(dilithium3.PublicKey), pub) {
 			return fail(errors.New("tls: private key does not match public key, dilithium3"))
 		}
-	case *dilithium5.PublicKey:
+	case dilithium5.PublicKey:
 		priv, ok := cert.PrivateKey.(*dilithium5.PrivateKey)
 		if !ok {
 			return fail(errors.New("tls: private key type does not match public key type, dilithium5"))
 		}
 
-		if !bytes.Equal(priv.Public().(*dilithium5.PublicKey).Pk, pub.Pk) {
+		if !bytes.Equal(priv.Public().(dilithium5.PublicKey), pub) {
 			return fail(errors.New("tls: private key does not match public key, dilithium5"))
 		}
-	case *dilithium2AES.PublicKey:
-		priv, ok := cert.PrivateKey.(*dilithium2AES.PrivateKey)
-		if !ok {
-			return fail(errors.New("tls: private key type does not match public key type, dilithium2AES"))
-		}
-
-		if !bytes.Equal(priv.Public().(*dilithium2AES.PublicKey).Pk, pub.Pk) {
-			return fail(errors.New("tls: private key does not match public key, dilithium2AES"))
-		}
-	case *dilithium3AES.PublicKey:
-		priv, ok := cert.PrivateKey.(*dilithium3AES.PrivateKey)
-		if !ok {
-			return fail(errors.New("tls: private key type does not match public key type, dilithium3AES"))
-		}
-
-		if !bytes.Equal(priv.Public().(*dilithium3AES.PublicKey).Pk, pub.Pk) {
-			return fail(errors.New("tls: private key does not match public key, dilithium3AES"))
-		}
-	case *dilithium5AES.PublicKey:
-		priv, ok := cert.PrivateKey.(*dilithium5AES.PrivateKey)
-		if !ok {
-			return fail(errors.New("tls: private key type does not match public key type, dilithium5AES"))
-		}
-
-		if !bytes.Equal(priv.Public().(*dilithium5AES.PublicKey).Pk, pub.Pk) {
-			return fail(errors.New("tls: private key does not match public key, dilithium5AES"))
-		}
-
-	case *rainbowIIIClassic.PublicKey:
-		priv, ok := cert.PrivateKey.(*rainbowIIIClassic.PrivateKey)
-		if !ok {
-			return fail(errors.New("tls: private key type does not match public key type, rainbowIIIClassic"))
-		}
-
-		if !bytes.Equal(priv.Public().(*rainbowIIIClassic.PublicKey).Pk, pub.Pk) {
-			return fail(errors.New("tls: private key does not match public key, rainbowIIIClassic"))
-		}
-	case *rainbowIIICircumzenithal.PublicKey:
-		priv, ok := cert.PrivateKey.(*rainbowIIICircumzenithal.PrivateKey)
-		if !ok {
-			return fail(errors.New("tls: private key type does not match public key type, rainbowIIICircumzenithal"))
-		}
-
-		if !bytes.Equal(priv.Public().(*rainbowIIICircumzenithal.PublicKey).Pk, pub.Pk) {
-			return fail(errors.New("tls: private key does not match public key, rainbowIIICircumzenithal"))
-		}
-	case *rainbowIIICompressed.PublicKey:
-		priv, ok := cert.PrivateKey.(*rainbowIIICompressed.PrivateKey)
-		if !ok {
-			return fail(errors.New("tls: private key type does not match public key type, rainbowIIICompressed"))
-		}
-
-		if !bytes.Equal(priv.Public().(*rainbowIIICompressed.PublicKey).Pk, pub.Pk) {
-			return fail(errors.New("tls: private key does not match public key, rainbowIIICompressed"))
-		}
-	case *rainbowVClassic.PublicKey:
-		priv, ok := cert.PrivateKey.(*rainbowVClassic.PrivateKey)
-		if !ok {
-			return fail(errors.New("tls: private key type does not match public key type, rainbowVClassic"))
-		}
-
-		if !bytes.Equal(priv.Public().(*rainbowVClassic.PublicKey).Pk, pub.Pk) {
-			return fail(errors.New("tls: private key does not match public key, rainbowVClassic"))
-		}
-	case *rainbowVCircumzenithal.PublicKey:
-		priv, ok := cert.PrivateKey.(*rainbowVCircumzenithal.PrivateKey)
-		if !ok {
-			return fail(errors.New("tls: private key type does not match public key type, rainbowVCircumzenithal"))
-		}
-
-		if !bytes.Equal(priv.Public().(*rainbowVCircumzenithal.PublicKey).Pk, pub.Pk) {
-			return fail(errors.New("tls: private key does not match public key, rainbowVCircumzenithal"))
-		}
-	case *rainbowVCompressed.PublicKey:
-		priv, ok := cert.PrivateKey.(*rainbowVCompressed.PrivateKey)
-		if !ok {
-			return fail(errors.New("tls: private key type does not match public key type, rainbowVCompressed"))
-		}
-
-		if !bytes.Equal(priv.Public().(*rainbowVCompressed.PublicKey).Pk, pub.Pk) {
-			return fail(errors.New("tls: private key does not match public key, rainbowVCompressed"))
-		}
-
 	default:
 		return fail(errors.New("tls: unknown public key algorithm"))
 	}

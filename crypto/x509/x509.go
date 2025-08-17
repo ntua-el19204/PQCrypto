@@ -39,18 +39,8 @@ import (
 	falcon512 "crypto/pqc/falcon/falcon512"
 
 	dilithium2 "crypto/pqc/dilithium/dilithium2"
-	dilithium2AES "crypto/pqc/dilithium/dilithium2AES"
 	dilithium3 "crypto/pqc/dilithium/dilithium3"
-	dilithium3AES "crypto/pqc/dilithium/dilithium3AES"
 	dilithium5 "crypto/pqc/dilithium/dilithium5"
-	dilithium5AES "crypto/pqc/dilithium/dilithium5AES"
-
-	rainbowIIICircumzenithal "crypto/pqc/rainbow/rainbowIIICircumzenithal"
-	rainbowIIIClassic "crypto/pqc/rainbow/rainbowIIIClassic"
-	rainbowIIICompressed "crypto/pqc/rainbow/rainbowIIICompressed"
-	rainbowVCircumzenithal "crypto/pqc/rainbow/rainbowVCircumzenithal"
-	rainbowVClassic "crypto/pqc/rainbow/rainbowVClassic"
-	rainbowVCompressed "crypto/pqc/rainbow/rainbowVCompressed"
 )
 
 // pkixPublicKey reflects a PKIX public key structure. See SubjectPublicKeyInfo
@@ -116,51 +106,22 @@ func marshalPublicKey(pub interface{}) (publicKeyBytes []byte, publicKeyAlgorith
 		publicKeyBytes = pub
 		publicKeyAlgorithm.Algorithm = oidPublicKeyEd25519
 
-	case *falcon512.PublicKey:
-		publicKeyBytes = pub.Pk
+	case falcon512.PublicKey:
+		publicKeyBytes = pub
 		publicKeyAlgorithm.Algorithm = oidPublicKeyFalcon512
-	case *falcon1024.PublicKey:
-		publicKeyBytes = pub.Pk
+	case falcon1024.PublicKey:
+		publicKeyBytes = pub
 		publicKeyAlgorithm.Algorithm = oidPublicKeyFalcon1024
 
-	case *dilithium2.PublicKey:
-		publicKeyBytes = pub.Pk
+	case dilithium2.PublicKey:
+		publicKeyBytes = pub
 		publicKeyAlgorithm.Algorithm = oidPublicKeyDilithium2
-	case *dilithium3.PublicKey:
-		publicKeyBytes = pub.Pk
+	case dilithium3.PublicKey:
+		publicKeyBytes = pub
 		publicKeyAlgorithm.Algorithm = oidPublicKeyDilithium3
-	case *dilithium5.PublicKey:
-		publicKeyBytes = pub.Pk
+	case dilithium5.PublicKey:
+		publicKeyBytes = pub
 		publicKeyAlgorithm.Algorithm = oidPublicKeyDilithium5
-	case *dilithium2AES.PublicKey:
-		publicKeyBytes = pub.Pk
-		publicKeyAlgorithm.Algorithm = oidPublicKeyDilithium2AES
-	case *dilithium3AES.PublicKey:
-		publicKeyBytes = pub.Pk
-		publicKeyAlgorithm.Algorithm = oidPublicKeyDilithium3AES
-	case *dilithium5AES.PublicKey:
-		publicKeyBytes = pub.Pk
-		publicKeyAlgorithm.Algorithm = oidPublicKeyDilithium5AES
-
-	case *rainbowIIIClassic.PublicKey:
-		publicKeyBytes = pub.Pk
-		publicKeyAlgorithm.Algorithm = oidPublicKeyRainbowIIIClassic
-	case *rainbowIIICircumzenithal.PublicKey:
-		publicKeyBytes = pub.Pk
-		publicKeyAlgorithm.Algorithm = oidPublicKeyRainbowIIICircumzenithal
-	case *rainbowIIICompressed.PublicKey:
-		publicKeyBytes = pub.Pk
-		publicKeyAlgorithm.Algorithm = oidPublicKeyRainbowIIICompressed
-	case *rainbowVClassic.PublicKey:
-		publicKeyBytes = pub.Pk
-		publicKeyAlgorithm.Algorithm = oidPublicKeyRainbowVClassic
-	case *rainbowVCircumzenithal.PublicKey:
-		publicKeyBytes = pub.Pk
-		publicKeyAlgorithm.Algorithm = oidPublicKeyRainbowVCircumzenithal
-	case *rainbowVCompressed.PublicKey:
-		publicKeyBytes = pub.Pk
-		publicKeyAlgorithm.Algorithm = oidPublicKeyRainbowVCompressed
-
 	default:
 		return nil, pkix.AlgorithmIdentifier{}, fmt.Errorf("x509: unsupported public key type: %T", pub)
 	}
@@ -267,16 +228,6 @@ const (
 	PureDilithium2
 	PureDilithium3
 	PureDilithium5
-	PureDilithium2AES
-	PureDilithium3AES
-	PureDilithium5AES
-
-	PureRainbowIIIClassic
-	PureRainbowIIICircumzenithal
-	PureRainbowIIICompressed
-	PureRainbowVClassic
-	PureRainbowVCircumzenithal
-	PureRainbowVCompressed
 )
 
 func (algo SignatureAlgorithm) isRSAPSS() bool {
@@ -312,16 +263,6 @@ const (
 	Dilithium2
 	Dilithium3
 	Dilithium5
-	Dilithium2AES
-	Dilithium3AES
-	Dilithium5AES
-
-	RainbowIIIClassic
-	RainbowIIICircumzenithal
-	RainbowIIICompressed
-	RainbowVClassic
-	RainbowVCircumzenithal
-	RainbowVCompressed
 )
 
 var publicKeyAlgoName = [...]string{
@@ -333,19 +274,9 @@ var publicKeyAlgoName = [...]string{
 	Falcon512:  "falcon512",
 	Falcon1024: "Falcon1024",
 
-	Dilithium2:    "Dilithium2",
-	Dilithium3:    "Dilithium3",
-	Dilithium5:    "Dilithium5",
-	Dilithium2AES: "Dilithium2AES",
-	Dilithium3AES: "Dilithium3AES",
-	Dilithium5AES: "Dilithium5AES",
-
-	RainbowIIIClassic:        "RainbowIIIClassic",
-	RainbowIIICircumzenithal: "RainbowIIICircumzenithal",
-	RainbowIIICompressed:     "RainbowIIICompressed",
-	RainbowVClassic:          "RainbowVClassic",
-	RainbowVCircumzenithal:   "RainbowVCircumzenithal",
-	RainbowVCompressed:       "RainbowVCompressed",
+	Dilithium2: "Dilithium2",
+	Dilithium3: "Dilithium3",
+	Dilithium5: "Dilithium5",
 }
 
 func (algo PublicKeyAlgorithm) String() string {
@@ -486,25 +417,15 @@ var signatureAlgorithmDetails = []struct {
 	{PureDilithium2, "Dilithium2", oidSignatureDilithium2, Dilithium2, crypto.Hash(0)},
 	{PureDilithium3, "Dilithium3", oidSignatureDilithium3, Dilithium3, crypto.Hash(0)},
 	{PureDilithium5, "Dilithium5", oidSignatureDilithium5, Dilithium5, crypto.Hash(0)},
-	{PureDilithium2AES, "Dilithium2AES", oidSignatureDilithium2AES, Dilithium2AES, crypto.Hash(0)},
-	{PureDilithium3AES, "Dilithium3AES", oidSignatureDilithium3AES, Dilithium3AES, crypto.Hash(0)},
-	{PureDilithium5AES, "Dilithium5AES", oidSignatureDilithium5AES, Dilithium5AES, crypto.Hash(0)},
-
-	{PureRainbowIIIClassic, "RainbowIIIClassic", oidSignatureRainbowIIIClassic, RainbowIIIClassic, crypto.Hash(0)},
-	{PureRainbowIIICircumzenithal, "RainbowIIICircumzenithal", oidSignatureRainbowIIICircumzenithal, RainbowIIICircumzenithal, crypto.Hash(0)},
-	{PureRainbowIIICompressed, "RainbowIIICompressed", oidSignatureRainbowIIICompressed, RainbowIIICompressed, crypto.Hash(0)},
-	{PureRainbowVClassic, "RainbowVClassic", oidSignatureRainbowVClassic, RainbowVClassic, crypto.Hash(0)},
-	{PureRainbowVCircumzenithal, "RainbowVCircumzenithal", oidSignatureRainbowVCircumzenithal, RainbowVCircumzenithal, crypto.Hash(0)},
-	{PureRainbowVCompressed, "RainbowVCompressed", oidSignatureRainbowVCompressed, RainbowVCompressed, crypto.Hash(0)},
 }
 
 // hashToPSSParameters contains the DER encoded RSA PSS parameters for the
 // SHA256, SHA384, and SHA512 hashes as defined in RFC 3447, Appendix A.2.3.
 // The parameters contain the following values:
-//   * hashAlgorithm contains the associated hash identifier with NULL parameters
-//   * maskGenAlgorithm always contains the default mgf1SHA1 identifier
-//   * saltLength contains the length of the associated hash
-//   * trailerField always contains the default trailerFieldBC value
+//   - hashAlgorithm contains the associated hash identifier with NULL parameters
+//   - maskGenAlgorithm always contains the default mgf1SHA1 identifier
+//   - saltLength contains the length of the associated hash
+//   - trailerField always contains the default trailerFieldBC value
 var hashToPSSParameters = map[crypto.Hash]asn1.RawValue{
 	crypto.SHA256: asn1.RawValue{FullBytes: []byte{48, 52, 160, 15, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 1, 5, 0, 161, 28, 48, 26, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 8, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 1, 5, 0, 162, 3, 2, 1, 32}},
 	crypto.SHA384: asn1.RawValue{FullBytes: []byte{48, 52, 160, 15, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 2, 5, 0, 161, 28, 48, 26, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 8, 48, 13, 6, 9, 96, 134, 72, 1, 101, 3, 4, 2, 2, 5, 0, 162, 3, 2, 1, 48}},
@@ -582,17 +503,19 @@ func getSignatureAlgorithmFromAI(ai pkix.AlgorithmIdentifier) SignatureAlgorithm
 // RFC 3279, 2.3 Public Key Algorithms
 //
 // pkcs-1 OBJECT IDENTIFIER ::== { iso(1) member-body(2) us(840)
-//    rsadsi(113549) pkcs(1) 1 }
+//
+//	rsadsi(113549) pkcs(1) 1 }
 //
 // rsaEncryption OBJECT IDENTIFIER ::== { pkcs1-1 1 }
 //
 // id-dsa OBJECT IDENTIFIER ::== { iso(1) member-body(2) us(840)
-//    x9-57(10040) x9cm(4) 1 }
 //
-// RFC 5480, 2.1.1 Unrestricted Algorithm Identifier and Parameters
+//	x9-57(10040) x9cm(4) 1 }
 //
-// id-ecPublicKey OBJECT IDENTIFIER ::= {
-//       iso(1) member-body(2) us(840) ansi-X9-62(10045) keyType(2) 1 }
+// # RFC 5480, 2.1.1 Unrestricted Algorithm Identifier and Parameters
+//
+//	id-ecPublicKey OBJECT IDENTIFIER ::= {
+//	      iso(1) member-body(2) us(840) ansi-X9-62(10045) keyType(2) 1 }
 var (
 	oidPublicKeyRSA     = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 1, 1}
 	oidPublicKeyDSA     = asn1.ObjectIdentifier{1, 2, 840, 10040, 4, 1}
@@ -602,19 +525,9 @@ var (
 	oidPublicKeyFalcon512  = oidSignatureFalcon512
 	oidPublicKeyFalcon1024 = oidSignatureFalcon1024
 
-	oidPublicKeyDilithium2    = oidSignatureDilithium2
-	oidPublicKeyDilithium3    = oidSignatureDilithium3
-	oidPublicKeyDilithium5    = oidSignatureDilithium5
-	oidPublicKeyDilithium2AES = oidSignatureDilithium2AES
-	oidPublicKeyDilithium3AES = oidSignatureDilithium3AES
-	oidPublicKeyDilithium5AES = oidSignatureDilithium5AES
-
-	oidPublicKeyRainbowIIIClassic        = oidSignatureRainbowIIIClassic
-	oidPublicKeyRainbowIIICircumzenithal = oidSignatureRainbowIIICircumzenithal
-	oidPublicKeyRainbowIIICompressed     = oidSignatureRainbowIIICompressed
-	oidPublicKeyRainbowVClassic          = oidSignatureRainbowVClassic
-	oidPublicKeyRainbowVCircumzenithal   = oidSignatureRainbowVCircumzenithal
-	oidPublicKeyRainbowVCompressed       = oidSignatureRainbowVCompressed
+	oidPublicKeyDilithium2 = oidSignatureDilithium2
+	oidPublicKeyDilithium3 = oidSignatureDilithium3
+	oidPublicKeyDilithium5 = oidSignatureDilithium5
 )
 
 func getPublicKeyAlgorithmFromOID(oid asn1.ObjectIdentifier) PublicKeyAlgorithm {
@@ -638,42 +551,24 @@ func getPublicKeyAlgorithmFromOID(oid asn1.ObjectIdentifier) PublicKeyAlgorithm 
 		return Dilithium3
 	case oid.Equal(oidPublicKeyDilithium5):
 		return Dilithium5
-	case oid.Equal(oidPublicKeyDilithium2AES):
-		return Dilithium2AES
-	case oid.Equal(oidPublicKeyDilithium3AES):
-		return Dilithium3AES
-	case oid.Equal(oidPublicKeyDilithium5AES):
-		return Dilithium5AES
-	case oid.Equal(oidPublicKeyRainbowIIIClassic):
-		return RainbowIIIClassic
-	case oid.Equal(oidPublicKeyRainbowIIICircumzenithal):
-		return RainbowIIICircumzenithal
-	case oid.Equal(oidPublicKeyRainbowIIICompressed):
-		return RainbowIIICompressed
-	case oid.Equal(oidPublicKeyRainbowVClassic):
-		return RainbowVClassic
-	case oid.Equal(oidPublicKeyRainbowVCircumzenithal):
-		return RainbowVCircumzenithal
-	case oid.Equal(oidPublicKeyRainbowVCompressed):
-		return RainbowVCompressed
 	}
 	return UnknownPublicKeyAlgorithm
 }
 
 // RFC 5480, 2.1.1.1. Named Curve
 //
-// secp224r1 OBJECT IDENTIFIER ::= {
-//   iso(1) identified-organization(3) certicom(132) curve(0) 33 }
+//	secp224r1 OBJECT IDENTIFIER ::= {
+//	  iso(1) identified-organization(3) certicom(132) curve(0) 33 }
 //
-// secp256r1 OBJECT IDENTIFIER ::= {
-//   iso(1) member-body(2) us(840) ansi-X9-62(10045) curves(3)
-//   prime(1) 7 }
+//	secp256r1 OBJECT IDENTIFIER ::= {
+//	  iso(1) member-body(2) us(840) ansi-X9-62(10045) curves(3)
+//	  prime(1) 7 }
 //
-// secp384r1 OBJECT IDENTIFIER ::= {
-//   iso(1) identified-organization(3) certicom(132) curve(0) 34 }
+//	secp384r1 OBJECT IDENTIFIER ::= {
+//	  iso(1) identified-organization(3) certicom(132) curve(0) 34 }
 //
-// secp521r1 OBJECT IDENTIFIER ::= {
-//   iso(1) identified-organization(3) certicom(132) curve(0) 35 }
+//	secp521r1 OBJECT IDENTIFIER ::= {
+//	  iso(1) identified-organization(3) certicom(132) curve(0) 35 }
 //
 // NB: secp256r1 is equivalent to prime256v1
 var (
@@ -1014,7 +909,7 @@ func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey
 
 	switch hashType {
 	case crypto.Hash(0):
-		if pubKeyAlgo != Ed25519 && pubKeyAlgo != Falcon512 && pubKeyAlgo != Falcon1024 && pubKeyAlgo != Dilithium2 && pubKeyAlgo != Dilithium3 && pubKeyAlgo != Dilithium5 && pubKeyAlgo != Dilithium2AES && pubKeyAlgo != Dilithium3AES && pubKeyAlgo != Dilithium5AES && pubKeyAlgo != RainbowIIIClassic && pubKeyAlgo != RainbowIIICircumzenithal && pubKeyAlgo != RainbowIIICompressed && pubKeyAlgo != RainbowVClassic && pubKeyAlgo != RainbowVCircumzenithal && pubKeyAlgo != RainbowVCompressed {
+		if pubKeyAlgo != Ed25519 && pubKeyAlgo != Falcon512 && pubKeyAlgo != Falcon1024 && pubKeyAlgo != Dilithium2 && pubKeyAlgo != Dilithium3 && pubKeyAlgo != Dilithium5 {
 			return ErrUnsupportedAlgorithm
 		}
 	case crypto.MD5:
@@ -1055,7 +950,7 @@ func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey
 		}
 		return
 
-	case *falcon512.PublicKey:
+	case falcon512.PublicKey:
 		if pubKeyAlgo != Falcon512 {
 			return signaturePublicKeyAlgoMismatchError(pubKeyAlgo, pub)
 		}
@@ -1063,7 +958,7 @@ func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey
 			return errors.New("x509: pqc verification failure, falcon512")
 		}
 		return
-	case *falcon1024.PublicKey:
+	case falcon1024.PublicKey:
 		if pubKeyAlgo != Falcon1024 {
 			return signaturePublicKeyAlgoMismatchError(pubKeyAlgo, pub)
 		}
@@ -1072,7 +967,7 @@ func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey
 		}
 		return
 
-	case *dilithium2.PublicKey:
+	case dilithium2.PublicKey:
 		if pubKeyAlgo != Dilithium2 {
 			return signaturePublicKeyAlgoMismatchError(pubKeyAlgo, pub)
 		}
@@ -1080,7 +975,7 @@ func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey
 			return errors.New("x509: pqc verification failure, dilithium2")
 		}
 		return
-	case *dilithium3.PublicKey:
+	case dilithium3.PublicKey:
 		if pubKeyAlgo != Dilithium3 {
 			return signaturePublicKeyAlgoMismatchError(pubKeyAlgo, pub)
 		}
@@ -1088,7 +983,7 @@ func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey
 			return errors.New("x509: pqc verification failure, dilithium3")
 		}
 		return
-	case *dilithium5.PublicKey:
+	case dilithium5.PublicKey:
 		if pubKeyAlgo != Dilithium5 {
 			return signaturePublicKeyAlgoMismatchError(pubKeyAlgo, pub)
 		}
@@ -1096,82 +991,6 @@ func checkSignature(algo SignatureAlgorithm, signed, signature []byte, publicKey
 			return errors.New("x509: pqc verification failure, dilithium5")
 		}
 		return
-	case *dilithium2AES.PublicKey:
-		if pubKeyAlgo != Dilithium2AES {
-			return signaturePublicKeyAlgoMismatchError(pubKeyAlgo, pub)
-		}
-		if !dilithium2AES.Verify(pub, signed, signature) {
-			return errors.New("x509: pqc verification failure, dilithium2AES")
-		}
-		return
-	case *dilithium3AES.PublicKey:
-		if pubKeyAlgo != Dilithium3AES {
-			return signaturePublicKeyAlgoMismatchError(pubKeyAlgo, pub)
-		}
-		if !dilithium3AES.Verify(pub, signed, signature) {
-			return errors.New("x509: pqc verification failure, dilithium3AES")
-		}
-		return
-	case *dilithium5AES.PublicKey:
-		if pubKeyAlgo != Dilithium5AES {
-			return signaturePublicKeyAlgoMismatchError(pubKeyAlgo, pub)
-		}
-		if !dilithium5AES.Verify(pub, signed, signature) {
-			return errors.New("x509: pqc verification failure, dilithium5AES")
-		}
-		return
-
-	case *rainbowIIIClassic.PublicKey:
-		if pubKeyAlgo != RainbowIIIClassic {
-			return signaturePublicKeyAlgoMismatchError(pubKeyAlgo, pub)
-		}
-		if !rainbowIIIClassic.Verify(pub, signed, signature) {
-			return errors.New("x509: pqc verification failure, rainbowIIIClassic")
-		}
-		return
-	case *rainbowIIICircumzenithal.PublicKey:
-		if pubKeyAlgo != RainbowIIICircumzenithal {
-			return signaturePublicKeyAlgoMismatchError(pubKeyAlgo, pub)
-		}
-		if !rainbowIIICircumzenithal.Verify(pub, signed, signature) {
-			return errors.New("x509: pqc verification failure, rainbowIIICircumzenithal")
-		}
-		return
-	case *rainbowIIICompressed.PublicKey:
-		if pubKeyAlgo != RainbowIIICompressed {
-			return signaturePublicKeyAlgoMismatchError(pubKeyAlgo, pub)
-		}
-		if !rainbowIIICompressed.Verify(pub, signed, signature) {
-			return errors.New("x509: pqc verification failure, rainbowIIICompressed")
-		}
-		return
-	case *rainbowVClassic.PublicKey:
-		if pubKeyAlgo != RainbowVClassic {
-			return signaturePublicKeyAlgoMismatchError(pubKeyAlgo, pub)
-		}
-		if !rainbowVClassic.Verify(pub, signed, signature) {
-			return errors.New("x509: pqc verification failure, rainbowVClassic")
-		}
-		return
-	case *rainbowVCircumzenithal.PublicKey:
-		if pubKeyAlgo != RainbowVCircumzenithal {
-			return signaturePublicKeyAlgoMismatchError(pubKeyAlgo, pub)
-		}
-		if !rainbowVCircumzenithal.Verify(pub, signed, signature) {
-			return errors.New("x509: pqc verification failure, rainbowVCircumzenithal")
-		}
-		return
-	case *rainbowVCompressed.PublicKey:
-		if pubKeyAlgo != RainbowVCompressed {
-			return signaturePublicKeyAlgoMismatchError(pubKeyAlgo, pub)
-		}
-		if !rainbowVCompressed.Verify(pub, signed, signature) {
-			return errors.New("x509: pqc verification failure, rainbowVCompressed")
-		}
-		return
-
-		//default:
-		//	fmt.Println("公钥类型: ", pub)
 	}
 	return ErrUnsupportedAlgorithm
 }
@@ -1698,35 +1517,6 @@ func signingParamsForPublicKey(pub interface{}, requestedSigAlgo SignatureAlgori
 	case *dilithium5.PublicKey:
 		pubType = Dilithium5
 		sigAlgo.Algorithm = oidSignatureDilithium5
-	case *dilithium2AES.PublicKey:
-		pubType = Dilithium2AES
-		sigAlgo.Algorithm = oidSignatureDilithium2AES
-	case *dilithium3AES.PublicKey:
-		pubType = Dilithium3AES
-		sigAlgo.Algorithm = oidSignatureDilithium3AES
-	case *dilithium5AES.PublicKey:
-		pubType = Dilithium5AES
-		sigAlgo.Algorithm = oidSignatureDilithium5AES
-
-	case *rainbowIIIClassic.PublicKey:
-		pubType = RainbowIIIClassic
-		sigAlgo.Algorithm = oidSignatureRainbowIIIClassic
-	case *rainbowIIICircumzenithal.PublicKey:
-		pubType = RainbowIIICircumzenithal
-		sigAlgo.Algorithm = oidSignatureRainbowIIICircumzenithal
-	case *rainbowIIICompressed.PublicKey:
-		pubType = RainbowIIICompressed
-		sigAlgo.Algorithm = oidSignatureRainbowIIICompressed
-	case *rainbowVClassic.PublicKey:
-		pubType = RainbowVClassic
-		sigAlgo.Algorithm = oidSignatureRainbowVClassic
-	case *rainbowVCircumzenithal.PublicKey:
-		pubType = RainbowVCircumzenithal
-		sigAlgo.Algorithm = oidSignatureRainbowVCircumzenithal
-	case *rainbowVCompressed.PublicKey:
-		pubType = RainbowVCompressed
-		sigAlgo.Algorithm = oidSignatureRainbowVCompressed
-
 	default:
 		err = errors.New("x509: only RSA, ECDSA and Ed25519 keys supported")
 	}
@@ -1748,7 +1538,7 @@ func signingParamsForPublicKey(pub interface{}, requestedSigAlgo SignatureAlgori
 			}
 			sigAlgo.Algorithm, hashFunc = details.oid, details.hash
 
-			if hashFunc == 0 && pubType != Ed25519 && pubType != Falcon512 && pubType != Falcon1024 && pubType != Dilithium2 && pubType != Dilithium3 && pubType != Dilithium5 && pubType != Dilithium2AES && pubType != Dilithium3AES && pubType != Dilithium5AES && pubType != RainbowIIIClassic && pubType != RainbowIIICircumzenithal && pubType != RainbowIIICompressed && pubType != RainbowVClassic && pubType != RainbowVCircumzenithal && pubType != RainbowVCompressed {
+			if hashFunc == 0 && pubType != Ed25519 && pubType != Falcon512 && pubType != Falcon1024 && pubType != Dilithium2 && pubType != Dilithium3 && pubType != Dilithium5 {
 				err = errors.New("x509: cannot sign with hash function requested")
 				return
 			}
@@ -1774,38 +1564,38 @@ var emptyASN1Subject = []byte{0x30, 0}
 // CreateCertificate creates a new X.509 v3 certificate based on a template.
 // The following members of template are currently used:
 //
-//  - AuthorityKeyId
-//  - BasicConstraintsValid
-//  - CRLDistributionPoints
-//  - DNSNames
-//  - EmailAddresses
-//  - ExcludedDNSDomains
-//  - ExcludedEmailAddresses
-//  - ExcludedIPRanges
-//  - ExcludedURIDomains
-//  - ExtKeyUsage
-//  - ExtraExtensions
-//  - IPAddresses
-//  - IsCA
-//  - IssuingCertificateURL
-//  - KeyUsage
-//  - MaxPathLen
-//  - MaxPathLenZero
-//  - NotAfter
-//  - NotBefore
-//  - OCSPServer
-//  - PermittedDNSDomains
-//  - PermittedDNSDomainsCritical
-//  - PermittedEmailAddresses
-//  - PermittedIPRanges
-//  - PermittedURIDomains
-//  - PolicyIdentifiers
-//  - SerialNumber
-//  - SignatureAlgorithm
-//  - Subject
-//  - SubjectKeyId
-//  - URIs
-//  - UnknownExtKeyUsage
+//   - AuthorityKeyId
+//   - BasicConstraintsValid
+//   - CRLDistributionPoints
+//   - DNSNames
+//   - EmailAddresses
+//   - ExcludedDNSDomains
+//   - ExcludedEmailAddresses
+//   - ExcludedIPRanges
+//   - ExcludedURIDomains
+//   - ExtKeyUsage
+//   - ExtraExtensions
+//   - IPAddresses
+//   - IsCA
+//   - IssuingCertificateURL
+//   - KeyUsage
+//   - MaxPathLen
+//   - MaxPathLenZero
+//   - NotAfter
+//   - NotBefore
+//   - OCSPServer
+//   - PermittedDNSDomains
+//   - PermittedDNSDomainsCritical
+//   - PermittedEmailAddresses
+//   - PermittedIPRanges
+//   - PermittedURIDomains
+//   - PolicyIdentifiers
+//   - SerialNumber
+//   - SignatureAlgorithm
+//   - Subject
+//   - SubjectKeyId
+//   - URIs
+//   - UnknownExtKeyUsage
 //
 // The certificate is signed by parent. If parent is equal to template then the
 // certificate is self-signed. The parameter pub is the public key of the
@@ -2183,14 +1973,14 @@ func parseCSRExtensions(rawAttributes []asn1.RawValue) ([]pkix.Extension, error)
 // CreateCertificateRequest creates a new certificate request based on a
 // template. The following members of template are used:
 //
-//  - SignatureAlgorithm
-//  - Subject
-//  - DNSNames
-//  - EmailAddresses
-//  - IPAddresses
-//  - URIs
-//  - ExtraExtensions
-//  - Attributes (deprecated)
+//   - SignatureAlgorithm
+//   - Subject
+//   - DNSNames
+//   - EmailAddresses
+//   - IPAddresses
+//   - URIs
+//   - ExtraExtensions
+//   - Attributes (deprecated)
 //
 // priv is the private key to sign the CSR with, and the corresponding public
 // key will be included in the CSR. It must implement crypto.Signer and its

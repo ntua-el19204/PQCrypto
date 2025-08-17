@@ -30,18 +30,8 @@ import (
 	falcon512 "crypto/pqc/falcon/falcon512"
 
 	dilithium2 "crypto/pqc/dilithium/dilithium2"
-	dilithium2AES "crypto/pqc/dilithium/dilithium2AES"
 	dilithium3 "crypto/pqc/dilithium/dilithium3"
-	dilithium3AES "crypto/pqc/dilithium/dilithium3AES"
 	dilithium5 "crypto/pqc/dilithium/dilithium5"
-	dilithium5AES "crypto/pqc/dilithium/dilithium5AES"
-
-	rainbowIIICircumzenithal "crypto/pqc/rainbow/rainbowIIICircumzenithal"
-	rainbowIIIClassic "crypto/pqc/rainbow/rainbowIIIClassic"
-	rainbowIIICompressed "crypto/pqc/rainbow/rainbowIIICompressed"
-	rainbowVCircumzenithal "crypto/pqc/rainbow/rainbowVCircumzenithal"
-	rainbowVClassic "crypto/pqc/rainbow/rainbowVClassic"
-	rainbowVCompressed "crypto/pqc/rainbow/rainbowVCompressed"
 )
 
 // isPrintable reports whether the given b is in the ASN.1 PrintableString set.
@@ -249,7 +239,7 @@ func parseExtension(der cryptobyte.String) (pkix.Extension, error) {
 func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{}, error) {
 	// TODO: this function is based 1.14.10, not 1.17.6, will soon update later
 	asn1Data := keyData.PublicKey.RightAlign()
-	
+
 	switch algo {
 	case RSA:
 		// RSA public keys must have a NULL in the parameters.
@@ -352,14 +342,14 @@ func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{
 		}
 		pub := make([]byte, falcon512.PublicKeySize)
 		copy(pub, asn1Data)
-		return &falcon512.PublicKey{Pk: pub}, nil
+		return falcon512.PublicKey(pub), nil
 	case Falcon1024:
 		if len(asn1Data) != falcon1024.PublicKeySize {
 			return nil, errors.New("x509: wrong falcon1024 public key size")
 		}
 		pub := make([]byte, falcon1024.PublicKeySize)
 		copy(pub, asn1Data)
-		return &falcon1024.PublicKey{Pk: pub}, nil
+		return falcon1024.PublicKey(pub), nil
 
 	case Dilithium2:
 		if len(asn1Data) != dilithium2.PublicKeySize {
@@ -367,86 +357,21 @@ func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{
 		}
 		pub := make([]byte, dilithium2.PublicKeySize)
 		copy(pub, asn1Data)
-		return &dilithium2.PublicKey{Pk: pub}, nil
+		return dilithium2.PublicKey(pub), nil
 	case Dilithium3:
 		if len(asn1Data) != dilithium3.PublicKeySize {
 			return nil, errors.New("x509: wrong dilithium3 public key size")
 		}
 		pub := make([]byte, dilithium3.PublicKeySize)
 		copy(pub, asn1Data)
-		return &dilithium3.PublicKey{Pk: pub}, nil
+		return dilithium3.PublicKey(pub), nil
 	case Dilithium5:
 		if len(asn1Data) != dilithium5.PublicKeySize {
 			return nil, errors.New("x509: wrong dilithium5 public key size")
 		}
 		pub := make([]byte, dilithium5.PublicKeySize)
 		copy(pub, asn1Data)
-		return &dilithium5.PublicKey{Pk: pub}, nil
-	case Dilithium2AES:
-		if len(asn1Data) != dilithium2AES.PublicKeySize {
-			return nil, errors.New("x509: wrong dilithium2AES public key size")
-		}
-		pub := make([]byte, dilithium2AES.PublicKeySize)
-		copy(pub, asn1Data)
-		return &dilithium2AES.PublicKey{Pk: pub}, nil
-	case Dilithium3AES:
-		if len(asn1Data) != dilithium3AES.PublicKeySize {
-			return nil, errors.New("x509: wrong dilithium3AES public key size")
-		}
-		pub := make([]byte, dilithium3AES.PublicKeySize)
-		copy(pub, asn1Data)
-		return &dilithium3AES.PublicKey{Pk: pub}, nil
-	case Dilithium5AES:
-		if len(asn1Data) != dilithium5AES.PublicKeySize {
-			return nil, errors.New("x509: wrong dilithium5AES public key size")
-		}
-		pub := make([]byte, dilithium5AES.PublicKeySize)
-		copy(pub, asn1Data)
-		return &dilithium5AES.PublicKey{Pk: pub}, nil
-
-	case RainbowIIIClassic:
-		if len(asn1Data) != rainbowIIIClassic.PublicKeySize {
-			return nil, errors.New("x509: wrong rainbowIIIClassic public key size")
-		}
-		pub := make([]byte, rainbowIIIClassic.PublicKeySize)
-		copy(pub, asn1Data)
-		return &rainbowIIIClassic.PublicKey{Pk: pub}, nil
-	case RainbowIIICircumzenithal:
-		if len(asn1Data) != rainbowIIICircumzenithal.PublicKeySize {
-			return nil, errors.New("x509: wrong rainbowIIICircumzenithal public key size")
-		}
-		pub := make([]byte, rainbowIIICircumzenithal.PublicKeySize)
-		copy(pub, asn1Data)
-		return &rainbowIIICircumzenithal.PublicKey{Pk: pub}, nil
-	case RainbowIIICompressed:
-		if len(asn1Data) != rainbowIIICompressed.PublicKeySize {
-			return nil, errors.New("x509: wrong rainbowIIICompressed public key size")
-		}
-		pub := make([]byte, rainbowIIICompressed.PublicKeySize)
-		copy(pub, asn1Data)
-		return &rainbowIIICompressed.PublicKey{Pk: pub}, nil
-	case RainbowVClassic:
-		if len(asn1Data) != rainbowVClassic.PublicKeySize {
-			return nil, errors.New("x509: wrong rainbowVClassic public key size")
-		}
-		pub := make([]byte, rainbowVClassic.PublicKeySize)
-		copy(pub, asn1Data)
-		return &rainbowVClassic.PublicKey{Pk: pub}, nil
-	case RainbowVCircumzenithal:
-		if len(asn1Data) != rainbowVCircumzenithal.PublicKeySize {
-			return nil, errors.New("x509: wrong rainbowVCircumzenithal public key size")
-		}
-		pub := make([]byte, rainbowVCircumzenithal.PublicKeySize)
-		copy(pub, asn1Data)
-		return &rainbowVCircumzenithal.PublicKey{Pk: pub}, nil
-	case RainbowVCompressed:
-		if len(asn1Data) != rainbowVCompressed.PublicKeySize {
-			return nil, errors.New("x509: wrong rainbowVCompressed public key size")
-		}
-		pub := make([]byte, rainbowVCompressed.PublicKeySize)
-		copy(pub, asn1Data)
-		return &rainbowVCompressed.PublicKey{Pk: pub}, nil
-
+		return dilithium5.PublicKey(pub), nil
 	default:
 		return nil, errors.New("x509: wrong public key")
 	}

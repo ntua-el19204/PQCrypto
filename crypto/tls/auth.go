@@ -11,19 +11,10 @@ import (
 	"crypto/ed25519"
 	"crypto/elliptic"
 	"crypto/pqc/dilithium/dilithium2"
-	dilithium2AES "crypto/pqc/dilithium/dilithium2AES"
 	dilithium3 "crypto/pqc/dilithium/dilithium3"
-	dilithium3AES "crypto/pqc/dilithium/dilithium3AES"
 	dilithium5 "crypto/pqc/dilithium/dilithium5"
-	dilithium5AES "crypto/pqc/dilithium/dilithium5AES"
 	falcon1024 "crypto/pqc/falcon/falcon1024"
 	"crypto/pqc/falcon/falcon512"
-	rainbowIIICircumzenithal "crypto/pqc/rainbow/rainbowIIICircumzenithal"
-	rainbowIIIClassic "crypto/pqc/rainbow/rainbowIIIClassic"
-	rainbowIIICompressed "crypto/pqc/rainbow/rainbowIIICompressed"
-	rainbowVCircumzenithal "crypto/pqc/rainbow/rainbowVCircumzenithal"
-	rainbowVClassic "crypto/pqc/rainbow/rainbowVClassic"
-	rainbowVCompressed "crypto/pqc/rainbow/rainbowVCompressed"
 	"crypto/rsa"
 	"errors"
 	"fmt"
@@ -53,7 +44,7 @@ func verifyHandshakeSignature(sigType uint8, pubkey crypto.PublicKey, hashFunc c
 		}
 
 	case signatureFalcon512:
-		pubKey, ok := pubkey.(*falcon512.PublicKey)
+		pubKey, ok := pubkey.(falcon512.PublicKey)
 		if !ok {
 			return fmt.Errorf("expected an *falcon512 public key, got %T", pubkey)
 		}
@@ -61,7 +52,7 @@ func verifyHandshakeSignature(sigType uint8, pubkey crypto.PublicKey, hashFunc c
 			return errors.New("falcon512 verification failure")
 		}
 	case signatureFalcon1024:
-		pubKey, ok := pubkey.(*falcon1024.PublicKey)
+		pubKey, ok := pubkey.(falcon1024.PublicKey)
 		if !ok {
 			return fmt.Errorf("expected an *falcon1024 public key, got %T", pubkey)
 		}
@@ -70,7 +61,7 @@ func verifyHandshakeSignature(sigType uint8, pubkey crypto.PublicKey, hashFunc c
 		}
 
 	case signatureDilithium2:
-		pubKey, ok := pubkey.(*dilithium2.PublicKey)
+		pubKey, ok := pubkey.(dilithium2.PublicKey)
 		if !ok {
 			return fmt.Errorf("expected an *dilithium2 public key, got %T", pubkey)
 		}
@@ -78,7 +69,7 @@ func verifyHandshakeSignature(sigType uint8, pubkey crypto.PublicKey, hashFunc c
 			return errors.New("dilithium2 verification failure")
 		}
 	case signatureDilithium3:
-		pubKey, ok := pubkey.(*dilithium3.PublicKey)
+		pubKey, ok := pubkey.(dilithium3.PublicKey)
 		if !ok {
 			return fmt.Errorf("expected an *dilithium3 public key, got %T", pubkey)
 		}
@@ -86,87 +77,13 @@ func verifyHandshakeSignature(sigType uint8, pubkey crypto.PublicKey, hashFunc c
 			return errors.New("dilithium3 verification failure")
 		}
 	case signatureDilithium5:
-		pubKey, ok := pubkey.(*dilithium5.PublicKey)
+		pubKey, ok := pubkey.(dilithium5.PublicKey)
 		if !ok {
 			return fmt.Errorf("expected an *dilithium5 public key, got %T", pubkey)
 		}
 		if !dilithium5.Verify(pubKey, signed, sig) {
 			return errors.New("dilithium5 verification failure")
 		}
-	case signatureDilithium2AES:
-		pubKey, ok := pubkey.(*dilithium2AES.PublicKey)
-		if !ok {
-			return fmt.Errorf("expected an *dilithium2AES public key, got %T", pubkey)
-		}
-		if !dilithium2AES.Verify(pubKey, signed, sig) {
-			return errors.New("dilithium2AES verification failure")
-		}
-	case signatureDilithium3AES:
-		pubKey, ok := pubkey.(*dilithium3AES.PublicKey)
-		if !ok {
-			return fmt.Errorf("expected an *dilithium3AES public key, got %T", pubkey)
-		}
-		if !dilithium3AES.Verify(pubKey, signed, sig) {
-			return errors.New("dilithium3AES verification failure")
-		}
-	case signatureDilithium5AES:
-		pubKey, ok := pubkey.(*dilithium5AES.PublicKey)
-		if !ok {
-			return fmt.Errorf("expected an *dilithium5AES public key, got %T", pubkey)
-		}
-		if !dilithium5AES.Verify(pubKey, signed, sig) {
-			return errors.New("dilithium5AES verification failure")
-		}
-
-	case signatureRainbowIIIClassic:
-		pubKey, ok := pubkey.(*rainbowIIIClassic.PublicKey)
-		if !ok {
-			return fmt.Errorf("expected an *rainbowIIIClassic public key, got %T", pubkey)
-		}
-		if !rainbowIIIClassic.Verify(pubKey, signed, sig) {
-			return errors.New("rainbowIIIClassic verification failure")
-		}
-	case signatureRainbowIIICircumzenithal:
-		pubKey, ok := pubkey.(*rainbowIIICircumzenithal.PublicKey)
-		if !ok {
-			return fmt.Errorf("expected an *rainbowIIICircumzenithal public key, got %T", pubkey)
-		}
-		if !rainbowIIICircumzenithal.Verify(pubKey, signed, sig) {
-			return errors.New("rainbowIIICircumzenithal verification failure")
-		}
-	case signatureRainbowIIICompressed:
-		pubKey, ok := pubkey.(*rainbowIIICompressed.PublicKey)
-		if !ok {
-			return fmt.Errorf("expected an *rainbowIIICompressed public key, got %T", pubkey)
-		}
-		if !rainbowIIICompressed.Verify(pubKey, signed, sig) {
-			return errors.New("rainbowIIICompressed verification failure")
-		}
-	case signatureRainbowVClassic:
-		pubKey, ok := pubkey.(*rainbowVClassic.PublicKey)
-		if !ok {
-			return fmt.Errorf("expected an *rainbowVClassic public key, got %T", pubkey)
-		}
-		if !rainbowVClassic.Verify(pubKey, signed, sig) {
-			return errors.New("rainbowVClassic verification failure")
-		}
-	case signatureRainbowVCircumzenithal:
-		pubKey, ok := pubkey.(*rainbowVCircumzenithal.PublicKey)
-		if !ok {
-			return fmt.Errorf("expected an *rainbowVCircumzenithal public key, got %T", pubkey)
-		}
-		if !rainbowVCircumzenithal.Verify(pubKey, signed, sig) {
-			return errors.New("rainbowVCircumzenithal verification failure")
-		}
-	case signatureRainbowVCompressed:
-		pubKey, ok := pubkey.(*rainbowVCompressed.PublicKey)
-		if !ok {
-			return fmt.Errorf("expected an *rainbowVCompressed public key, got %T", pubkey)
-		}
-		if !rainbowVCompressed.Verify(pubKey, signed, sig) {
-			return errors.New("rainbowVCompressed verification failure")
-		}
-
 	case signaturePKCS1v15:
 		pubKey, ok := pubkey.(*rsa.PublicKey)
 		if !ok {
@@ -246,24 +163,6 @@ func typeAndHashFromSignatureScheme(signatureAlgorithm SignatureScheme) (sigType
 		sigType = signatureDilithium3
 	case Dilithium5:
 		sigType = signatureDilithium5
-	case Dilithium2AES:
-		sigType = signatureDilithium2AES
-	case Dilithium3AES:
-		sigType = signatureDilithium3AES
-	case Dilithium5AES:
-		sigType = signatureDilithium5AES
-	case RainbowIIIClassic:
-		sigType = signatureRainbowIIIClassic
-	case RainbowIIICircumzenithal:
-		sigType = signatureRainbowIIICircumzenithal
-	case RainbowIIICompressed:
-		sigType = signatureRainbowIIICompressed
-	case RainbowVClassic:
-		sigType = signatureRainbowVClassic
-	case RainbowVCircumzenithal:
-		sigType = signatureRainbowVCircumzenithal
-	case RainbowVCompressed:
-		sigType = signatureRainbowVCompressed
 
 	default:
 		return 0, 0, fmt.Errorf("unsupported signature algorithm: %v", signatureAlgorithm)
@@ -279,10 +178,7 @@ func typeAndHashFromSignatureScheme(signatureAlgorithm SignatureScheme) (sigType
 		hash = crypto.SHA512
 	case Ed25519,
 		Falcon512, Falcon1024,
-		Dilithium2, Dilithium3, Dilithium5,
-		Dilithium2AES, Dilithium3AES, Dilithium5AES,
-		RainbowIIIClassic, RainbowIIICircumzenithal, RainbowIIICompressed,
-		RainbowVClassic, RainbowVCircumzenithal, RainbowVCompressed:
+		Dilithium2, Dilithium3, Dilithium5:
 		hash = directSigning
 	default:
 		return 0, 0, fmt.Errorf("unsupported signature algorithm: %v", signatureAlgorithm)
@@ -301,10 +197,7 @@ func legacyTypeAndHashFromPublicKey(pub crypto.PublicKey) (sigType uint8, hash c
 		return signatureECDSA, crypto.SHA1, nil
 	case ed25519.PublicKey,
 		*falcon512.PublicKey, *falcon1024.PublicKey,
-		*dilithium2.PublicKey, *dilithium3.PublicKey, *dilithium5.PublicKey,
-		*dilithium2AES.PublicKey, *dilithium3AES.PublicKey, *dilithium5AES.PublicKey,
-		*rainbowIIIClassic.PublicKey, *rainbowIIICircumzenithal.PublicKey, *rainbowIIICompressed.PublicKey,
-		*rainbowVClassic.PublicKey, *rainbowVCircumzenithal.PublicKey, *rainbowVCompressed.PublicKey:
+		*dilithium2.PublicKey, *dilithium3.PublicKey, *dilithium5.PublicKey:
 
 		// RFC 8422 specifies support for Ed25519 in TLS 1.0 and 1.1,
 		// but it requires holding on to a handshake transcript to do a
@@ -392,26 +285,6 @@ func signatureSchemesForCertificate(version uint16, cert *Certificate) []Signatu
 		sigAlgs = []SignatureScheme{Dilithium3}
 	case *dilithium5.PublicKey:
 		sigAlgs = []SignatureScheme{Dilithium5}
-	case *dilithium2AES.PublicKey:
-		sigAlgs = []SignatureScheme{Dilithium2AES}
-	case *dilithium3AES.PublicKey:
-		sigAlgs = []SignatureScheme{Dilithium3AES}
-	case *dilithium5AES.PublicKey:
-		sigAlgs = []SignatureScheme{Dilithium5AES}
-
-	case *rainbowIIIClassic.PublicKey:
-		sigAlgs = []SignatureScheme{RainbowIIIClassic}
-	case *rainbowIIICircumzenithal.PublicKey:
-		sigAlgs = []SignatureScheme{RainbowIIICircumzenithal}
-	case *rainbowIIICompressed.PublicKey:
-		sigAlgs = []SignatureScheme{RainbowIIICompressed}
-	case *rainbowVClassic.PublicKey:
-		sigAlgs = []SignatureScheme{RainbowVClassic}
-	case *rainbowVCircumzenithal.PublicKey:
-		sigAlgs = []SignatureScheme{RainbowVCircumzenithal}
-	case *rainbowVCompressed.PublicKey:
-		sigAlgs = []SignatureScheme{RainbowVCompressed}
-
 	default:
 		return nil
 	}
@@ -457,10 +330,7 @@ func unsupportedCertificateError(cert *Certificate) error {
 	switch cert.PrivateKey.(type) {
 	case rsa.PrivateKey, ecdsa.PrivateKey,
 		falcon512.PrivateKey, falcon1024.PrivateKey,
-		dilithium2.PrivateKey, dilithium3.PrivateKey, dilithium5.PrivateKey,
-		dilithium2AES.PrivateKey, dilithium3AES.PrivateKey, dilithium5AES.PrivateKey,
-		rainbowIIIClassic.PrivateKey, rainbowIIICircumzenithal.PrivateKey, rainbowIIICompressed.PrivateKey,
-		rainbowVClassic.PrivateKey, rainbowVCircumzenithal.PrivateKey, rainbowVCompressed.PrivateKey:
+		dilithium2.PrivateKey, dilithium3.PrivateKey, dilithium5.PrivateKey:
 		return fmt.Errorf("tls: unsupported certificate: private key is %T, expected *%T",
 			cert.PrivateKey, cert.PrivateKey)
 	case *ed25519.PrivateKey:
@@ -487,10 +357,7 @@ func unsupportedCertificateError(cert *Certificate) error {
 		return fmt.Errorf("tls: certificate RSA key size too small for supported signature algorithms")
 	case ed25519.PublicKey,
 		*falcon512.PublicKey, *falcon1024.PublicKey,
-		*dilithium2.PublicKey, *dilithium3.PublicKey, *dilithium5.PublicKey,
-		*dilithium2AES.PublicKey, *dilithium3AES.PublicKey, *dilithium5AES.PublicKey,
-		*rainbowIIIClassic.PublicKey, *rainbowIIICircumzenithal.PublicKey, *rainbowIIICompressed.PublicKey,
-		*rainbowVClassic.PublicKey, *rainbowVCircumzenithal.PublicKey, *rainbowVCompressed.PublicKey:
+		*dilithium2.PublicKey, *dilithium3.PublicKey, *dilithium5.PublicKey:
 	default:
 		return fmt.Errorf("tls: unsupported certificate key (%T)", pub)
 	}

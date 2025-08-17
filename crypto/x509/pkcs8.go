@@ -17,18 +17,8 @@ import (
 	falcon512 "crypto/pqc/falcon/falcon512"
 
 	dilithium2 "crypto/pqc/dilithium/dilithium2"
-	dilithium2AES "crypto/pqc/dilithium/dilithium2AES"
 	dilithium3 "crypto/pqc/dilithium/dilithium3"
-	dilithium3AES "crypto/pqc/dilithium/dilithium3AES"
 	dilithium5 "crypto/pqc/dilithium/dilithium5"
-	dilithium5AES "crypto/pqc/dilithium/dilithium5AES"
-
-	rainbowIIICircumzenithal "crypto/pqc/rainbow/rainbowIIICircumzenithal"
-	rainbowIIIClassic "crypto/pqc/rainbow/rainbowIIIClassic"
-	rainbowIIICompressed "crypto/pqc/rainbow/rainbowIIICompressed"
-	rainbowVCircumzenithal "crypto/pqc/rainbow/rainbowVCircumzenithal"
-	rainbowVClassic "crypto/pqc/rainbow/rainbowVClassic"
-	rainbowVCompressed "crypto/pqc/rainbow/rainbowVCompressed"
 )
 
 // pkcs8 reflects an ASN.1, PKCS #8 PrivateKey. See
@@ -101,7 +91,7 @@ func ParsePKCS8PrivateKey(der []byte) (key interface{}, err error) {
 		}
 		return &falcon512.PrivateKey{
 			Sk:        skBytes,
-			PublicKey: falcon512.PublicKey{Pk: pkBytes},
+			PublicKey: pkBytes,
 		}, nil
 	case privKey.Algo.Algorithm.Equal(oidPublicKeyFalcon1024):
 		pkBytes := privKey.Algo.Parameters.Bytes
@@ -111,7 +101,7 @@ func ParsePKCS8PrivateKey(der []byte) (key interface{}, err error) {
 		}
 		return &falcon1024.PrivateKey{
 			Sk:        skBytes,
-			PublicKey: falcon1024.PublicKey{Pk: pkBytes},
+			PublicKey: pkBytes,
 		}, nil
 
 	case privKey.Algo.Algorithm.Equal(oidPublicKeyDilithium2):
@@ -122,7 +112,7 @@ func ParsePKCS8PrivateKey(der []byte) (key interface{}, err error) {
 		}
 		return &dilithium2.PrivateKey{
 			Sk:        skBytes,
-			PublicKey: dilithium2.PublicKey{Pk: pkBytes},
+			PublicKey: pkBytes,
 		}, nil
 	case privKey.Algo.Algorithm.Equal(oidPublicKeyDilithium3):
 		pkBytes := privKey.Algo.Parameters.Bytes
@@ -132,7 +122,7 @@ func ParsePKCS8PrivateKey(der []byte) (key interface{}, err error) {
 		}
 		return &dilithium3.PrivateKey{
 			Sk:        skBytes,
-			PublicKey: dilithium3.PublicKey{Pk: pkBytes},
+			PublicKey: pkBytes,
 		}, nil
 	case privKey.Algo.Algorithm.Equal(oidPublicKeyDilithium5):
 		pkBytes := privKey.Algo.Parameters.Bytes
@@ -142,100 +132,8 @@ func ParsePKCS8PrivateKey(der []byte) (key interface{}, err error) {
 		}
 		return &dilithium5.PrivateKey{
 			Sk:        skBytes,
-			PublicKey: dilithium5.PublicKey{Pk: pkBytes},
+			PublicKey: pkBytes,
 		}, nil
-	case privKey.Algo.Algorithm.Equal(oidPublicKeyDilithium2AES):
-		pkBytes := privKey.Algo.Parameters.Bytes
-		skBytes := privKey.PrivateKey
-		if len(pkBytes) != dilithium2AES.PublicKeySize || len(skBytes) != dilithium2AES.PrivateKeySize {
-			return nil, errors.New("x509: invalid dilithium2AES pk or sk size")
-		}
-		return &dilithium2AES.PrivateKey{
-			Sk:        skBytes,
-			PublicKey: dilithium2AES.PublicKey{Pk: pkBytes},
-		}, nil
-	case privKey.Algo.Algorithm.Equal(oidPublicKeyDilithium3AES):
-		pkBytes := privKey.Algo.Parameters.Bytes
-		skBytes := privKey.PrivateKey
-		if len(pkBytes) != dilithium3AES.PublicKeySize || len(skBytes) != dilithium3AES.PrivateKeySize {
-			return nil, errors.New("x509: invalid dilithium3AES pk or sk size")
-		}
-		return &dilithium3AES.PrivateKey{
-			Sk:        skBytes,
-			PublicKey: dilithium3AES.PublicKey{Pk: pkBytes},
-		}, nil
-	case privKey.Algo.Algorithm.Equal(oidPublicKeyDilithium5AES):
-		pkBytes := privKey.Algo.Parameters.Bytes
-		skBytes := privKey.PrivateKey
-		if len(pkBytes) != dilithium5AES.PublicKeySize || len(skBytes) != dilithium5AES.PrivateKeySize {
-			return nil, errors.New("x509: invalid dilithium5AES pk or sk size")
-		}
-		return &dilithium5AES.PrivateKey{
-			Sk:        skBytes,
-			PublicKey: dilithium5AES.PublicKey{Pk: pkBytes},
-		}, nil
-
-	case privKey.Algo.Algorithm.Equal(oidPublicKeyRainbowIIIClassic):
-		pkBytes := privKey.Algo.Parameters.Bytes
-		skBytes := privKey.PrivateKey
-		if len(pkBytes) != rainbowIIIClassic.PublicKeySize || len(skBytes) != rainbowIIIClassic.PrivateKeySize {
-			return nil, errors.New("x509: invalid rainbowIIIClassic pk or sk size")
-		}
-		return &rainbowIIIClassic.PrivateKey{
-			Sk:        skBytes,
-			PublicKey: rainbowIIIClassic.PublicKey{Pk: pkBytes},
-		}, nil
-	case privKey.Algo.Algorithm.Equal(oidPublicKeyRainbowIIICircumzenithal):
-		pkBytes := privKey.Algo.Parameters.Bytes
-		skBytes := privKey.PrivateKey
-		if len(pkBytes) != rainbowIIICircumzenithal.PublicKeySize || len(skBytes) != rainbowIIICircumzenithal.PrivateKeySize {
-			return nil, errors.New("x509: invalid rainbowIIICircumzenithal pk or sk size")
-		}
-		return &rainbowIIICircumzenithal.PrivateKey{
-			Sk:        skBytes,
-			PublicKey: rainbowIIICircumzenithal.PublicKey{Pk: pkBytes},
-		}, nil
-	case privKey.Algo.Algorithm.Equal(oidPublicKeyRainbowIIICompressed):
-		pkBytes := privKey.Algo.Parameters.Bytes
-		skBytes := privKey.PrivateKey
-		if len(pkBytes) != rainbowIIICompressed.PublicKeySize || len(skBytes) != rainbowIIICompressed.PrivateKeySize {
-			return nil, errors.New("x509: invalid rainbowIIICompressed pk or sk size")
-		}
-		return &rainbowIIICompressed.PrivateKey{
-			Sk:        skBytes,
-			PublicKey: rainbowIIICompressed.PublicKey{Pk: pkBytes},
-		}, nil
-	case privKey.Algo.Algorithm.Equal(oidPublicKeyRainbowVClassic):
-		pkBytes := privKey.Algo.Parameters.Bytes
-		skBytes := privKey.PrivateKey
-		if len(pkBytes) != rainbowVClassic.PublicKeySize || len(skBytes) != rainbowVClassic.PrivateKeySize {
-			return nil, errors.New("x509: invalid rainbowVClassic pk or sk size")
-		}
-		return &rainbowVClassic.PrivateKey{
-			Sk:        skBytes,
-			PublicKey: rainbowVClassic.PublicKey{Pk: pkBytes},
-		}, nil
-	case privKey.Algo.Algorithm.Equal(oidPublicKeyRainbowVCircumzenithal):
-		pkBytes := privKey.Algo.Parameters.Bytes
-		skBytes := privKey.PrivateKey
-		if len(pkBytes) != rainbowVCircumzenithal.PublicKeySize || len(skBytes) != rainbowVCircumzenithal.PrivateKeySize {
-			return nil, errors.New("x509: invalid rainbowVCircumzenithal pk or sk size")
-		}
-		return &rainbowVCircumzenithal.PrivateKey{
-			Sk:        skBytes,
-			PublicKey: rainbowVCircumzenithal.PublicKey{Pk: pkBytes},
-		}, nil
-	case privKey.Algo.Algorithm.Equal(oidPublicKeyRainbowVCompressed):
-		pkBytes := privKey.Algo.Parameters.Bytes
-		skBytes := privKey.PrivateKey
-		if len(pkBytes) != rainbowVCompressed.PublicKeySize || len(skBytes) != rainbowVCompressed.PrivateKeySize {
-			return nil, errors.New("x509: invalid rainbowVCompressed pk or sk size")
-		}
-		return &rainbowVCompressed.PrivateKey{
-			Sk:        skBytes,
-			PublicKey: rainbowVCompressed.PublicKey{Pk: pkBytes},
-		}, nil
-
 	default:
 		return nil, fmt.Errorf("x509: PKCS#8 wrapping contained private key with unknown algorithm: %v", privKey.Algo.Algorithm)
 	}
@@ -294,7 +192,7 @@ func MarshalPKCS8PrivateKey(key interface{}) ([]byte, error) {
 		privKey.Algo = pkix.AlgorithmIdentifier{
 			Algorithm: oidPublicKeyFalcon512,
 			Parameters: asn1.RawValue{
-				Bytes: k.Pk,
+				Bytes: k.PublicKey,
 			},
 		}
 		privKey.PrivateKey = k.Sk
@@ -302,7 +200,7 @@ func MarshalPKCS8PrivateKey(key interface{}) ([]byte, error) {
 		privKey.Algo = pkix.AlgorithmIdentifier{
 			Algorithm: oidPublicKeyFalcon1024,
 			Parameters: asn1.RawValue{
-				Bytes: k.Pk,
+				Bytes: k.PublicKey,
 			},
 		}
 		privKey.PrivateKey = k.Sk
@@ -311,7 +209,7 @@ func MarshalPKCS8PrivateKey(key interface{}) ([]byte, error) {
 		privKey.Algo = pkix.AlgorithmIdentifier{
 			Algorithm: oidPublicKeyDilithium2,
 			Parameters: asn1.RawValue{
-				Bytes: k.Pk,
+				Bytes: k.PublicKey,
 			},
 		}
 		privKey.PrivateKey = k.Sk
@@ -319,7 +217,7 @@ func MarshalPKCS8PrivateKey(key interface{}) ([]byte, error) {
 		privKey.Algo = pkix.AlgorithmIdentifier{
 			Algorithm: oidPublicKeyDilithium3,
 			Parameters: asn1.RawValue{
-				Bytes: k.Pk,
+				Bytes: k.PublicKey,
 			},
 		}
 		privKey.PrivateKey = k.Sk
@@ -327,84 +225,10 @@ func MarshalPKCS8PrivateKey(key interface{}) ([]byte, error) {
 		privKey.Algo = pkix.AlgorithmIdentifier{
 			Algorithm: oidPublicKeyDilithium5,
 			Parameters: asn1.RawValue{
-				Bytes: k.Pk,
+				Bytes: k.PublicKey,
 			},
 		}
 		privKey.PrivateKey = k.Sk
-	case *dilithium2AES.PrivateKey:
-		privKey.Algo = pkix.AlgorithmIdentifier{
-			Algorithm: oidPublicKeyDilithium2AES,
-			Parameters: asn1.RawValue{
-				Bytes: k.Pk,
-			},
-		}
-		privKey.PrivateKey = k.Sk
-	case *dilithium3AES.PrivateKey:
-		privKey.Algo = pkix.AlgorithmIdentifier{
-			Algorithm: oidPublicKeyDilithium3AES,
-			Parameters: asn1.RawValue{
-				Bytes: k.Pk,
-			},
-		}
-		privKey.PrivateKey = k.Sk
-	case *dilithium5AES.PrivateKey:
-		privKey.Algo = pkix.AlgorithmIdentifier{
-			Algorithm: oidPublicKeyDilithium5AES,
-			Parameters: asn1.RawValue{
-				Bytes: k.Pk,
-			},
-		}
-		privKey.PrivateKey = k.Sk
-
-	case *rainbowIIIClassic.PrivateKey:
-		privKey.Algo = pkix.AlgorithmIdentifier{
-			Algorithm: oidPublicKeyRainbowIIIClassic,
-			Parameters: asn1.RawValue{
-				Bytes: k.Pk,
-			},
-		}
-		privKey.PrivateKey = k.Sk
-	case *rainbowIIICircumzenithal.PrivateKey:
-		privKey.Algo = pkix.AlgorithmIdentifier{
-			Algorithm: oidPublicKeyRainbowIIICircumzenithal,
-			Parameters: asn1.RawValue{
-				Bytes: k.Pk,
-			},
-		}
-		privKey.PrivateKey = k.Sk
-	case *rainbowIIICompressed.PrivateKey:
-		privKey.Algo = pkix.AlgorithmIdentifier{
-			Algorithm: oidPublicKeyRainbowIIICompressed,
-			Parameters: asn1.RawValue{
-				Bytes: k.Pk,
-			},
-		}
-		privKey.PrivateKey = k.Sk
-	case *rainbowVClassic.PrivateKey:
-		privKey.Algo = pkix.AlgorithmIdentifier{
-			Algorithm: oidPublicKeyRainbowVClassic,
-			Parameters: asn1.RawValue{
-				Bytes: k.Pk,
-			},
-		}
-		privKey.PrivateKey = k.Sk
-	case *rainbowVCircumzenithal.PrivateKey:
-		privKey.Algo = pkix.AlgorithmIdentifier{
-			Algorithm: oidPublicKeyRainbowVCircumzenithal,
-			Parameters: asn1.RawValue{
-				Bytes: k.Pk,
-			},
-		}
-		privKey.PrivateKey = k.Sk
-	case *rainbowVCompressed.PrivateKey:
-		privKey.Algo = pkix.AlgorithmIdentifier{
-			Algorithm: oidPublicKeyRainbowVCompressed,
-			Parameters: asn1.RawValue{
-				Bytes: k.Pk,
-			},
-		}
-		privKey.PrivateKey = k.Sk
-
 	default:
 		return nil, fmt.Errorf("x509: unknown key type while marshaling PKCS#8: %T", key)
 	}

@@ -13,19 +13,10 @@ import (
 	"crypto/ed25519"
 	"crypto/elliptic"
 	"crypto/pqc/dilithium/dilithium2"
-	dilithium2AES "crypto/pqc/dilithium/dilithium2AES"
 	dilithium3 "crypto/pqc/dilithium/dilithium3"
-	dilithium3AES "crypto/pqc/dilithium/dilithium3AES"
 	dilithium5 "crypto/pqc/dilithium/dilithium5"
-	dilithium5AES "crypto/pqc/dilithium/dilithium5AES"
 	falcon1024 "crypto/pqc/falcon/falcon1024"
 	"crypto/pqc/falcon/falcon512"
-	rainbowIIICircumzenithal "crypto/pqc/rainbow/rainbowIIICircumzenithal"
-	rainbowIIIClassic "crypto/pqc/rainbow/rainbowIIIClassic"
-	rainbowIIICompressed "crypto/pqc/rainbow/rainbowIIICompressed"
-	rainbowVCircumzenithal "crypto/pqc/rainbow/rainbowVCircumzenithal"
-	rainbowVClassic "crypto/pqc/rainbow/rainbowVClassic"
-	rainbowVCompressed "crypto/pqc/rainbow/rainbowVCompressed"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha512"
@@ -104,6 +95,7 @@ const (
 	extensionSignatureAlgorithms     uint16 = 13
 	extensionALPN                    uint16 = 16
 	extensionSCT                     uint16 = 18
+	extensionExtendedMasterSecret    uint16 = 23
 	extensionSessionTicket           uint16 = 35
 	extensionPreSharedKey            uint16 = 41
 	extensionEarlyData               uint16 = 42
@@ -113,6 +105,7 @@ const (
 	extensionCertificateAuthorities  uint16 = 47
 	extensionSignatureAlgorithmsCert uint16 = 50
 	extensionKeyShare                uint16 = 51
+	extensionQUICTransportParameters uint16 = 57
 	extensionRenegotiationInfo       uint16 = 0xff01
 )
 
@@ -184,15 +177,6 @@ const (
 	signatureDilithium2
 	signatureDilithium3
 	signatureDilithium5
-	signatureDilithium2AES
-	signatureDilithium3AES
-	signatureDilithium5AES
-	signatureRainbowIIIClassic
-	signatureRainbowIIICircumzenithal
-	signatureRainbowIIICompressed
-	signatureRainbowVClassic
-	signatureRainbowVCircumzenithal
-	signatureRainbowVCompressed
 )
 
 // directSigning is a standard Hash value that signals that no pre-hashing
@@ -205,7 +189,7 @@ var directSigning crypto.Hash = 0
 // the code advertises as supported in a TLS 1.2+ ClientHello and in a TLS 1.2+
 // CertificateRequest. The two fields are merged to match with TLS 1.3.
 // Note that in TLS 1.2, the ECDSA algorithms are not constrained to P-256, etc.
-var supportedSignatureAlgorithms = []SignatureScheme{
+var defaultSupportedSignatureAlgorithms = []SignatureScheme{
 	PSSWithSHA256,
 	ECDSAWithP256AndSHA256,
 	Ed25519,
@@ -224,15 +208,6 @@ var supportedSignatureAlgorithms = []SignatureScheme{
 	Dilithium2,
 	Dilithium3,
 	Dilithium5,
-	Dilithium2AES,
-	Dilithium3AES,
-	Dilithium5AES,
-	RainbowIIIClassic,
-	RainbowIIICircumzenithal,
-	RainbowIIICompressed,
-	RainbowVClassic,
-	RainbowVCircumzenithal,
-	RainbowVCompressed,
 }
 
 // helloRetryRequestRandom is set as the Random value of a ServerHello
@@ -370,25 +345,6 @@ func requiresClientCert(c ClientAuthType) bool {
 	}
 }
 
-// ClientSessionState contains the state needed by clients to resume TLS
-// sessions.
-type ClientSessionState struct {
-	sessionTicket      []uint8               // Encrypted ticket used for session resumption with server
-	vers               uint16                // TLS version negotiated for the session
-	cipherSuite        uint16                // Ciphersuite negotiated for the session
-	masterSecret       []byte                // Full handshake MasterSecret, or TLS 1.3 resumption_master_secret
-	serverCertificates []*x509.Certificate   // Certificate chain presented by the server
-	verifiedChains     [][]*x509.Certificate // Certificate chains we built for verification
-	receivedAt         time.Time             // When the session ticket was received from the server
-	ocspResponse       []byte                // Stapled OCSP response presented by the server
-	scts               [][]byte              // SCTs presented by the server
-
-	// TLS 1.3 fields.
-	nonce  []byte    // Ticket nonce sent by the server, to derive PSK
-	useBy  time.Time // Expiration of the ticket lifetime as set by the server
-	ageAdd uint32    // Random obfuscation factor for sending the ticket age
-}
-
 // ClientSessionCache is a cache of ClientSessionState objects that can be used
 // by a client to resume a TLS session with a given server. ClientSessionCache
 // implementations should expect to be called concurrently from different
@@ -432,20 +388,11 @@ const (
 	// EdDSA algorithms.
 	Ed25519 SignatureScheme = 0x0807
 
-	Falcon512                SignatureScheme = 0x0808
-	Falcon1024               SignatureScheme = 0x0809
-	Dilithium2               SignatureScheme = 0x080A
-	Dilithium3               SignatureScheme = 0x080B
-	Dilithium5               SignatureScheme = 0x080C
-	Dilithium2AES            SignatureScheme = 0x080D
-	Dilithium3AES            SignatureScheme = 0x080E
-	Dilithium5AES            SignatureScheme = 0x080F
-	RainbowIIIClassic        SignatureScheme = 0x0810
-	RainbowIIICircumzenithal SignatureScheme = 0x0811
-	RainbowIIICompressed     SignatureScheme = 0x0812
-	RainbowVClassic          SignatureScheme = 0x0813
-	RainbowVCircumzenithal   SignatureScheme = 0x0814
-	RainbowVCompressed       SignatureScheme = 0x0815
+	Falcon512  SignatureScheme = 0x0808
+	Falcon1024 SignatureScheme = 0x0809
+	Dilithium2 SignatureScheme = 0x080A
+	Dilithium3 SignatureScheme = 0x080B
+	Dilithium5 SignatureScheme = 0x080C
 
 	// Legacy signature and hash algorithms for TLS 1.2.
 	PKCS1WithSHA1 SignatureScheme = 0x0201
@@ -741,6 +688,35 @@ type Config struct {
 	// session resumption. It is only used by clients.
 	ClientSessionCache ClientSessionCache
 
+	// UnwrapSession is called on the server to turn a ticket/identity
+	// previously produced by [WrapSession] into a usable session.
+	//
+	// UnwrapSession will usually either decrypt a session state in the ticket
+	// (for example with [Config.EncryptTicket]), or use the ticket as a handle
+	// to recover a previously stored state. It must use [ParseSessionState] to
+	// deserialize the session state.
+	//
+	// If UnwrapSession returns an error, the connection is terminated. If it
+	// returns (nil, nil), the session is ignored. crypto/tls may still choose
+	// not to resume the returned session.
+	UnwrapSession func(identity []byte, cs ConnectionState) (*SessionState, error)
+
+	// WrapSession is called on the server to produce a session ticket/identity.
+	//
+	// WrapSession must serialize the session state with [SessionState.Bytes].
+	// It may then encrypt the serialized state (for example with
+	// [Config.DecryptTicket]) and use it as the ticket, or store the state and
+	// return a handle for it.
+	//
+	// If WrapSession returns an error, the connection is terminated.
+	//
+	// Warning: the return value will be exposed on the wire and to clients in
+	// plaintext. The application is in charge of encrypting and authenticating
+	// it (and rotating keys) or returning high-entropy identifiers. Failing to
+	// do so correctly can compromise current, previous, and future connections
+	// depending on the protocol version.
+	WrapSession func(ConnectionState, *SessionState) ([]byte, error)
+
 	// MinVersion contains the minimum TLS version that is acceptable.
 	// If zero, TLS 1.0 is currently taken as the minimum.
 	MinVersion uint16
@@ -1024,9 +1000,21 @@ var supportedVersions = []uint16{
 	VersionTLS10,
 }
 
-func (c *Config) supportedVersions() []uint16 {
+// roleClient and roleServer are meant to call supportedVersions and parents
+// with more readability at the callsite.
+const roleClient = true
+const roleServer = false
+
+func (c *Config) supportedVersions(isClient bool) []uint16 {
 	versions := make([]uint16, 0, len(supportedVersions))
 	for _, v := range supportedVersions {
+		if needFIPS() && (v < fipsMinVersion(c) || v > fipsMaxVersion(c)) {
+			continue
+		}
+		if (c == nil || c.MinVersion == 0) &&
+			isClient && v < VersionTLS12 {
+			continue
+		}
 		if c != nil && c.MinVersion != 0 && v < c.MinVersion {
 			continue
 		}
@@ -1038,8 +1026,8 @@ func (c *Config) supportedVersions() []uint16 {
 	return versions
 }
 
-func (c *Config) maxSupportedVersion() uint16 {
-	supportedVersions := c.supportedVersions()
+func (c *Config) maxSupportedVersion(isClient bool) uint16 {
+	supportedVersions := c.supportedVersions(isClient)
 	if len(supportedVersions) == 0 {
 		return 0
 	}
@@ -1080,8 +1068,8 @@ func (c *Config) supportsCurve(curve CurveID) bool {
 
 // mutualVersion returns the protocol version to use given the advertised
 // versions of the peer. Priority is given to the peer preference order.
-func (c *Config) mutualVersion(peerVersions []uint16) (uint16, bool) {
-	supportedVersions := c.supportedVersions()
+func (c *Config) mutualVersion(isClient bool, peerVersions []uint16) (uint16, bool) {
+	supportedVersions := c.supportedVersions(isClient)
 	for _, peerVersion := range peerVersions {
 		for _, v := range supportedVersions {
 			if v == peerVersion {
@@ -1160,7 +1148,7 @@ func (chi *ClientHelloInfo) SupportsCertificate(c *Certificate) error {
 	if config == nil {
 		config = &Config{}
 	}
-	vers, ok := config.mutualVersion(chi.SupportedVersions)
+	vers, ok := config.mutualVersion(roleServer, chi.SupportedVersions)
 	if !ok {
 		return errors.New("no mutually supported protocol versions")
 	}
@@ -1261,10 +1249,7 @@ func (chi *ClientHelloInfo) SupportsCertificate(c *Certificate) error {
 			ecdsaCipherSuite = true
 		case ed25519.PublicKey,
 			*falcon512.PublicKey, *falcon1024.PublicKey,
-			*dilithium2.PublicKey, *dilithium3.PublicKey, *dilithium5.PublicKey,
-			*dilithium2AES.PublicKey, *dilithium3AES.PublicKey, *dilithium5AES.PublicKey,
-			*rainbowIIIClassic.PublicKey, *rainbowIIICircumzenithal.PublicKey, *rainbowIIICompressed.PublicKey,
-			*rainbowVClassic.PublicKey, *rainbowVCircumzenithal.PublicKey, *rainbowVCompressed.PublicKey:
+			*dilithium2.PublicKey, *dilithium3.PublicKey, *dilithium5.PublicKey:
 			if vers < VersionTLS12 || len(chi.SignatureSchemes) == 0 {
 				return errors.New("connection doesn't support Ed25519, or falcon512 => rainbowVCompressed")
 			}
@@ -1423,7 +1408,7 @@ func (c *Certificate) leaf() (*x509.Certificate, error) {
 }
 
 type handshakeMessage interface {
-	marshal() []byte
+	marshal() ([]byte, error)
 	unmarshal([]byte) bool
 }
 
@@ -1521,4 +1506,19 @@ func isSupportedSignatureAlgorithm(sigAlg SignatureScheme, supportedSignatureAlg
 		}
 	}
 	return false
+}
+
+// CertificateVerificationError is returned when certificate verification fails during the handshake.
+type CertificateVerificationError struct {
+	// UnverifiedCertificates and its contents should not be modified.
+	UnverifiedCertificates []*x509.Certificate
+	Err                    error
+}
+
+func (e *CertificateVerificationError) Error() string {
+	return fmt.Sprintf("tls: failed to verify certificate: %s", e.Err)
+}
+
+func (e *CertificateVerificationError) Unwrap() error {
+	return e.Err
 }
