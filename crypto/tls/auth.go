@@ -274,16 +274,16 @@ func signatureSchemesForCertificate(version uint16, cert *Certificate) []Signatu
 	case ed25519.PublicKey:
 		sigAlgs = []SignatureScheme{Ed25519}
 
-	case *falcon512.PublicKey:
+	case falcon512.PublicKey:
 		sigAlgs = []SignatureScheme{Falcon512}
-	case *falcon1024.PublicKey:
+	case falcon1024.PublicKey:
 		sigAlgs = []SignatureScheme{Falcon1024}
 
-	case *dilithium2.PublicKey:
+	case dilithium2.PublicKey:
 		sigAlgs = []SignatureScheme{Dilithium2}
-	case *dilithium3.PublicKey:
+	case dilithium3.PublicKey:
 		sigAlgs = []SignatureScheme{Dilithium3}
-	case *dilithium5.PublicKey:
+	case dilithium5.PublicKey:
 		sigAlgs = []SignatureScheme{Dilithium5}
 	default:
 		return nil
