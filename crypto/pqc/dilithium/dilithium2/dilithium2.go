@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+
 var signer = oqs.Signature{}
 var verifier = oqs.Signature{}
 

@@ -6,6 +6,7 @@ package tls
 
 import (
 	"crypto/ecdh"
+	"crypto/hkdf"
 	"crypto/hmac"
 	"errors"
 	"fmt"
@@ -13,7 +14,7 @@ import (
 	"io"
 
 	"golang.org/x/crypto/cryptobyte"
-	"golang.org/x/crypto/hkdf"
+	//"golang.org/x/crypto/hkdf"
 )
 
 // This file contains the functions necessary to compute the TLS 1.3 key

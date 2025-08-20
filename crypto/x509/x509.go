@@ -122,6 +122,7 @@ func marshalPublicKey(pub interface{}) (publicKeyBytes []byte, publicKeyAlgorith
 	case dilithium5.PublicKey:
 		publicKeyBytes = pub
 		publicKeyAlgorithm.Algorithm = oidPublicKeyDilithium5
+
 	default:
 		return nil, pkix.AlgorithmIdentifier{}, fmt.Errorf("x509: unsupported public key type: %T", pub)
 	}
@@ -360,19 +361,9 @@ var (
 	oidSignatureFalcon512  = asn1.ObjectIdentifier{1, 1, 0, 0} // function, security leveal, algorithm name, count
 	oidSignatureFalcon1024 = asn1.ObjectIdentifier{1, 5, 0, 1}
 
-	oidSignatureDilithium2    = asn1.ObjectIdentifier{1, 2, 1, 0}
-	oidSignatureDilithium3    = asn1.ObjectIdentifier{1, 3, 1, 1}
-	oidSignatureDilithium5    = asn1.ObjectIdentifier{1, 5, 1, 2}
-	oidSignatureDilithium2AES = asn1.ObjectIdentifier{1, 2, 1, 3}
-	oidSignatureDilithium3AES = asn1.ObjectIdentifier{1, 3, 1, 4}
-	oidSignatureDilithium5AES = asn1.ObjectIdentifier{1, 5, 1, 5}
-
-	oidSignatureRainbowIIIClassic        = asn1.ObjectIdentifier{1, 3, 2, 3}
-	oidSignatureRainbowIIICircumzenithal = asn1.ObjectIdentifier{1, 3, 2, 4}
-	oidSignatureRainbowIIICompressed     = asn1.ObjectIdentifier{1, 3, 2, 5}
-	oidSignatureRainbowVClassic          = asn1.ObjectIdentifier{1, 5, 2, 6}
-	oidSignatureRainbowVCircumzenithal   = asn1.ObjectIdentifier{1, 5, 2, 7}
-	oidSignatureRainbowVCompressed       = asn1.ObjectIdentifier{1, 5, 2, 8}
+	oidSignatureDilithium2 = asn1.ObjectIdentifier{1, 2, 1, 0}
+	oidSignatureDilithium3 = asn1.ObjectIdentifier{1, 3, 1, 1}
+	oidSignatureDilithium5 = asn1.ObjectIdentifier{1, 5, 1, 2}
 
 	oidSHA256 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 2, 1}
 	oidSHA384 = asn1.ObjectIdentifier{2, 16, 840, 1, 101, 3, 4, 2, 2}
@@ -1501,22 +1492,23 @@ func signingParamsForPublicKey(pub interface{}, requestedSigAlgo SignatureAlgori
 		pubType = Ed25519
 		sigAlgo.Algorithm = oidSignatureEd25519
 
-	case *falcon512.PublicKey:
+	case falcon512.PublicKey:
 		pubType = Falcon512
 		sigAlgo.Algorithm = oidSignatureFalcon512
-	case *falcon1024.PublicKey:
+	case falcon1024.PublicKey:
 		pubType = Falcon1024
 		sigAlgo.Algorithm = oidSignatureFalcon1024
 
-	case *dilithium2.PublicKey:
+	case dilithium2.PublicKey:
 		pubType = Dilithium2
 		sigAlgo.Algorithm = oidSignatureDilithium2
-	case *dilithium3.PublicKey:
+	case dilithium3.PublicKey:
 		pubType = Dilithium3
 		sigAlgo.Algorithm = oidSignatureDilithium3
-	case *dilithium5.PublicKey:
+	case dilithium5.PublicKey:
 		pubType = Dilithium5
 		sigAlgo.Algorithm = oidSignatureDilithium5
+
 	default:
 		err = errors.New("x509: only RSA, ECDSA and Ed25519 keys supported")
 	}
