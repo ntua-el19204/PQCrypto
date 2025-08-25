@@ -10,19 +10,10 @@ import (
 	"crypto/ecdsa"
 	"crypto/ed25519"
 	"crypto/pqc/dilithium/dilithium2"
-	dilithium2AES "crypto/pqc/dilithium/dilithium2AES"
 	dilithium3 "crypto/pqc/dilithium/dilithium3"
-	dilithium3AES "crypto/pqc/dilithium/dilithium3AES"
 	dilithium5 "crypto/pqc/dilithium/dilithium5"
-	dilithium5AES "crypto/pqc/dilithium/dilithium5AES"
 	falcon1024 "crypto/pqc/falcon/falcon1024"
 	"crypto/pqc/falcon/falcon512"
-	rainbowIIICircumzenithal "crypto/pqc/rainbow/rainbowIIICircumzenithal"
-	rainbowIIIClassic "crypto/pqc/rainbow/rainbowIIIClassic"
-	rainbowIIICompressed "crypto/pqc/rainbow/rainbowIIICompressed"
-	rainbowVCircumzenithal "crypto/pqc/rainbow/rainbowVCircumzenithal"
-	rainbowVClassic "crypto/pqc/rainbow/rainbowVClassic"
-	rainbowVCompressed "crypto/pqc/rainbow/rainbowVCompressed"
 	"crypto/rsa"
 	"crypto/subtle"
 	"crypto/x509"
@@ -907,11 +898,8 @@ func (c *Conn) processCertsFromClient(certificate Certificate) error {
 	if len(certs) > 0 {
 		switch certs[0].PublicKey.(type) {
 		case *ecdsa.PublicKey, *rsa.PublicKey, ed25519.PublicKey,
-			*falcon512.PublicKey, *falcon1024.PublicKey,
-			*dilithium2.PublicKey, *dilithium3.PublicKey, *dilithium5.PublicKey,
-			*dilithium2AES.PublicKey, *dilithium3AES.PublicKey, *dilithium5AES.PublicKey,
-			*rainbowIIIClassic.PublicKey, *rainbowIIICircumzenithal.PublicKey, *rainbowIIICompressed.PublicKey,
-			*rainbowVClassic.PublicKey, *rainbowVCircumzenithal.PublicKey, *rainbowVCompressed.PublicKey:
+			falcon512.PublicKey, falcon1024.PublicKey,
+			dilithium2.PublicKey, dilithium3.PublicKey, dilithium5.PublicKey:
 
 		default:
 			c.sendAlert(alertUnsupportedCertificate)

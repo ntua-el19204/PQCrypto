@@ -17,9 +17,6 @@ import (
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/ed25519"
-	rainbowVCircumzenithal "crypto/pqc/rainbow/rainbowVCircumzenithal"
-	rainbowVClassic "crypto/pqc/rainbow/rainbowVClassic"
-	rainbowVCompressed "crypto/pqc/rainbow/rainbowVCompressed"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
@@ -33,15 +30,8 @@ import (
 	"crypto/pqc/falcon/falcon512"
 
 	"crypto/pqc/dilithium/dilithium2"
-	dilithium2AES "crypto/pqc/dilithium/dilithium2AES"
 	dilithium3 "crypto/pqc/dilithium/dilithium3"
-	dilithium3AES "crypto/pqc/dilithium/dilithium3AES"
 	dilithium5 "crypto/pqc/dilithium/dilithium5"
-	dilithium5AES "crypto/pqc/dilithium/dilithium5AES"
-
-	rainbowIIICircumzenithal "crypto/pqc/rainbow/rainbowIIICircumzenithal"
-	rainbowIIIClassic "crypto/pqc/rainbow/rainbowIIIClassic"
-	rainbowIIICompressed "crypto/pqc/rainbow/rainbowIIICompressed"
 )
 
 // Server returns a new TLS server side connection
@@ -408,10 +398,7 @@ func parsePrivateKey(der []byte) (crypto.PrivateKey, error) {
 		switch key := key.(type) {
 		case *rsa.PrivateKey, *ecdsa.PrivateKey, ed25519.PrivateKey,
 			*falcon512.PrivateKey, *falcon1024.PrivateKey,
-			*dilithium2.PrivateKey, *dilithium3.PrivateKey, *dilithium5.PrivateKey,
-			*dilithium2AES.PrivateKey, *dilithium3AES.PrivateKey, *dilithium5AES.PrivateKey,
-			*rainbowIIIClassic.PrivateKey, *rainbowIIICircumzenithal.PrivateKey, *rainbowIIICompressed.PrivateKey,
-			*rainbowVClassic.PrivateKey, *rainbowVCircumzenithal.PrivateKey, *rainbowVCompressed.PrivateKey:
+			*dilithium2.PrivateKey, *dilithium3.PrivateKey, *dilithium5.PrivateKey:
 			return key, nil
 		default:
 			return nil, errors.New("tls: found unknown private key type in PKCS#8 wrapping")

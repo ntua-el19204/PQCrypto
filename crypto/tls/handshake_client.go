@@ -974,8 +974,8 @@ func (c *Conn) verifyServerCertificate(certificates [][]byte) error {
 
 	switch certs[0].PublicKey.(type) {
 	case *rsa.PublicKey, *ecdsa.PublicKey, ed25519.PublicKey,
-		*falcon512.PublicKey, *falcon1024.PublicKey,
-		*dilithium2.PublicKey, *dilithium3.PublicKey, *dilithium5.PublicKey:
+		falcon512.PublicKey, falcon1024.PublicKey,
+		dilithium2.PublicKey, dilithium3.PublicKey, dilithium5.PublicKey:
 		break
 	default:
 		c.sendAlert(alertUnsupportedCertificate)

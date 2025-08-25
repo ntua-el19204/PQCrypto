@@ -1249,7 +1249,7 @@ func (chi *ClientHelloInfo) SupportsCertificate(c *Certificate) error {
 			ecdsaCipherSuite = true
 		case ed25519.PublicKey,
 			*falcon512.PublicKey, *falcon1024.PublicKey,
-			*dilithium2.PublicKey, *dilithium3.PublicKey, *dilithium5.PublicKey:
+			dilithium2.PublicKey, dilithium3.PublicKey, dilithium5.PublicKey:
 			if vers < VersionTLS12 || len(chi.SignatureSchemes) == 0 {
 				return errors.New("connection doesn't support Ed25519, or falcon512 => rainbowVCompressed")
 			}

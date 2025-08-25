@@ -543,6 +543,7 @@ func getPublicKeyAlgorithmFromOID(oid asn1.ObjectIdentifier) PublicKeyAlgorithm 
 	case oid.Equal(oidPublicKeyDilithium5):
 		return Dilithium5
 	}
+
 	return UnknownPublicKeyAlgorithm
 }
 

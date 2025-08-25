@@ -240,20 +240,20 @@ func signingParamsForPublicKey(pub interface{}, requestedSigAlgo x509.SignatureA
 			err = errors.New("x509: unknown elliptic curve")
 		}
 
-	case *falcon512.PublicKey:
+	case falcon512.PublicKey:
 		pubType = x509.Falcon512
 		sigAlgo.Algorithm = oidSignatureFalcon512
-	case *falcon1024.PublicKey:
+	case falcon1024.PublicKey:
 		pubType = x509.Falcon1024
 		sigAlgo.Algorithm = oidSignatureFalcon1024
 
-	case *dilithium2.PublicKey:
+	case dilithium2.PublicKey:
 		pubType = x509.Dilithium2
 		sigAlgo.Algorithm = oidSignatureDilithium2
-	case *dilithium3.PublicKey:
+	case dilithium3.PublicKey:
 		pubType = x509.Dilithium3
 		sigAlgo.Algorithm = oidSignatureDilithium3
-	case *dilithium5.PublicKey:
+	case dilithium5.PublicKey:
 		pubType = x509.Dilithium5
 		sigAlgo.Algorithm = oidSignatureDilithium5
 

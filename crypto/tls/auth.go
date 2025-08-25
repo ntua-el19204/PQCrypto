@@ -63,7 +63,7 @@ func verifyHandshakeSignature(sigType uint8, pubkey crypto.PublicKey, hashFunc c
 	case signatureDilithium2:
 		pubKey, ok := pubkey.(dilithium2.PublicKey)
 		if !ok {
-			return fmt.Errorf("expected an *dilithium2 public key, got %T", pubkey)
+			return fmt.Errorf("expected an dilithium2 public key, got %T", pubkey)
 		}
 		if !dilithium2.Verify(pubKey, signed, sig) {
 			return errors.New("dilithium2 verification failure")
@@ -71,7 +71,7 @@ func verifyHandshakeSignature(sigType uint8, pubkey crypto.PublicKey, hashFunc c
 	case signatureDilithium3:
 		pubKey, ok := pubkey.(dilithium3.PublicKey)
 		if !ok {
-			return fmt.Errorf("expected an *dilithium3 public key, got %T", pubkey)
+			return fmt.Errorf("expected an dilithium3 public key, got %T", pubkey)
 		}
 		if !dilithium3.Verify(pubKey, signed, sig) {
 			return errors.New("dilithium3 verification failure")
@@ -79,7 +79,7 @@ func verifyHandshakeSignature(sigType uint8, pubkey crypto.PublicKey, hashFunc c
 	case signatureDilithium5:
 		pubKey, ok := pubkey.(dilithium5.PublicKey)
 		if !ok {
-			return fmt.Errorf("expected an *dilithium5 public key, got %T", pubkey)
+			return fmt.Errorf("expected an dilithium5 public key, got %T", pubkey)
 		}
 		if !dilithium5.Verify(pubKey, signed, sig) {
 			return errors.New("dilithium5 verification failure")
@@ -196,8 +196,8 @@ func legacyTypeAndHashFromPublicKey(pub crypto.PublicKey) (sigType uint8, hash c
 	case *ecdsa.PublicKey:
 		return signatureECDSA, crypto.SHA1, nil
 	case ed25519.PublicKey,
-		*falcon512.PublicKey, *falcon1024.PublicKey,
-		*dilithium2.PublicKey, *dilithium3.PublicKey, *dilithium5.PublicKey:
+		falcon512.PublicKey, falcon1024.PublicKey,
+		dilithium2.PublicKey, dilithium3.PublicKey, dilithium5.PublicKey:
 
 		// RFC 8422 specifies support for Ed25519 in TLS 1.0 and 1.1,
 		// but it requires holding on to a handshake transcript to do a
@@ -356,8 +356,8 @@ func unsupportedCertificateError(cert *Certificate) error {
 	case *rsa.PublicKey:
 		return fmt.Errorf("tls: certificate RSA key size too small for supported signature algorithms")
 	case ed25519.PublicKey,
-		*falcon512.PublicKey, *falcon1024.PublicKey,
-		*dilithium2.PublicKey, *dilithium3.PublicKey, *dilithium5.PublicKey:
+		falcon512.PublicKey, falcon1024.PublicKey,
+		dilithium2.PublicKey, dilithium3.PublicKey, dilithium5.PublicKey:
 	default:
 		return fmt.Errorf("tls: unsupported certificate key (%T)", pub)
 	}

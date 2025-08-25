@@ -237,6 +237,7 @@ func parseExtension(der cryptobyte.String) (pkix.Extension, error) {
 }
 
 func parsePublicKey(algo PublicKeyAlgorithm, keyData *publicKeyInfo) (interface{}, error) {
+	fmt.Printf("DEBUG: parsePublicKey called with algo=%v (%d)\n", algo, int(algo))
 	// TODO: this function is based 1.14.10, not 1.17.6, will soon update later
 	asn1Data := keyData.PublicKey.RightAlign()
 
