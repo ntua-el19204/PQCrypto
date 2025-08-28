@@ -12,6 +12,7 @@ import (
 	"crypto/rsa"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"hash"
 	"io"
 	"time"
@@ -431,6 +432,10 @@ func (hs *serverHandshakeStateTLS13) pickCertificate() error {
 	if len(hs.clientHello.supportedSignatureAlgorithms) == 0 {
 		return c.sendAlert(alertMissingExtension)
 	}
+
+	// >>> ADD THIS DEBUG LINE <<<
+	fmt.Printf("[tls] clientHello sigalgs: [%s]\n",
+		sigList(hs.clientHello.supportedSignatureAlgorithms))
 
 	certificate, err := c.config.getCertificate(clientHelloInfo(hs.ctx, c, hs.clientHello))
 	if err != nil {

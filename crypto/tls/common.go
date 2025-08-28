@@ -1522,3 +1522,49 @@ func (e *CertificateVerificationError) Error() string {
 func (e *CertificateVerificationError) Unwrap() error {
 	return e.Err
 }
+
+// Debug function
+func sigName(a SignatureScheme) string {
+	switch a {
+	case ECDSAWithP256AndSHA256:
+		return "ECDSA_P256_SHA256"
+	case ECDSAWithP384AndSHA384:
+		return "ECDSA_P384_SHA384"
+	case ECDSAWithP521AndSHA512:
+		return "ECDSA_P521_SHA512"
+	case PKCS1WithSHA256:
+		return "RSA_PKCS1_SHA256"
+	case PKCS1WithSHA384:
+		return "RSA_PKCS1_SHA384"
+	case PKCS1WithSHA512:
+		return "RSA_PKCS1_SHA512"
+	case PSSWithSHA256:
+		return "RSA_PSS_SHA256"
+	case PSSWithSHA384:
+		return "RSA_PSS_SHA384"
+	case PSSWithSHA512:
+		return "RSA_PSS_SHA512"
+	case Ed25519:
+		return "Ed25519"
+	case Falcon512:
+		return "Falcon512"
+	case Falcon1024:
+		return "Falcon1024"
+	case Dilithium2:
+		return "Dilithium2"
+	case Dilithium3:
+		return "Dilithium3"
+	case Dilithium5:
+		return "Dilithium5"
+	default:
+		return fmt.Sprintf("0x%04x", uint16(a))
+	}
+}
+
+func sigList(algs []SignatureScheme) string {
+	names := make([]string, 0, len(algs))
+	for _, a := range algs {
+		names = append(names, sigName(a))
+	}
+	return strings.Join(names, ", ")
+}

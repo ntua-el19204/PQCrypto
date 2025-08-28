@@ -306,6 +306,17 @@ func signatureSchemesForCertificate(version uint16, cert *Certificate) []Signatu
 // versions that support signature algorithms, so TLS 1.2 and 1.3.
 func selectSignatureScheme(vers uint16, c *Certificate, peerAlgs []SignatureScheme) (SignatureScheme, error) {
 	supportedAlgs := signatureSchemesForCertificate(vers, c)
+
+	// DEBUG
+	var pubType string
+	if s, ok := c.PrivateKey.(crypto.Signer); ok {
+		pubType = fmt.Sprintf("%T", s.Public())
+	} else {
+		pubType = fmt.Sprintf("%T", c.PrivateKey)
+	}
+	fmt.Printf("[tls] selectSignatureScheme vers=0x%x certPub=%s supported=[%s] peer=[%s]\n",
+		vers, pubType, sigList(supportedAlgs), sigList(peerAlgs))
+
 	if len(supportedAlgs) == 0 {
 		return 0, unsupportedCertificateError(c)
 	}
@@ -321,6 +332,7 @@ func selectSignatureScheme(vers uint16, c *Certificate, peerAlgs []SignatureSche
 			return preferredAlg, nil
 		}
 	}
+	fmt.Printf("[tls] no overlap between server cert algs and client sigalgs — aborting\n")
 	return 0, errors.New("tls: peer doesn't support any of the certificate's signature algorithms")
 }
 
